@@ -21,3 +21,15 @@ Surowy HTML (`urllib.request`): `index.html` 3952 B i `produkt/P49235.html` 2770
 **0** rekordów (0 `tr.wiersz-produktu`, 0 `article.produkt`, 0 `data-id`), po 2 znaczniki
 `<script>`; w DOM po skryptach 72 rekordy na podstronę. Wniosek: dane są wstrzykiwane
 wyłącznie przez JavaScript. Pełna mapa selektorów: `docs/SELEKTORY.md`.
+
+## Faza 2: czyszczenie danych
+Funkcje czyszczące w `bajtoparser/parsing/` są czyste (bez selenium) i testowane bez
+przeglądarki: 97 testów pytest, najpierw napisanych i uruchomionych bez implementacji
+(`ModuleNotFoundError`), potem zielonych. Formaty surowych wartości ustalono z DOM-u
+(podstrona 1 i 20 stron produktów), nie z założeń. Decyzje: (1) waluty nie są przeliczane,
+cena to `float` + kod `PLN`/`EUR`/`USD`; (2) waluta wykrywana po symbolu (`zł`, `€`, `$`),
+a znaczenie przecinka zależy od waluty: dla USD to separator tysięcy (`$1,299.00`), dla
+PLN/EUR dziesiętny (`1 299,00 zł`); (3) prefiks `<span class="etykieta">` z kart usuwa
+warstwa `pages/`, nie `parsing/`; (4) `gratis` w koszcie dostawy to `0.0` bez waluty;
+(5) nieznana jednostka (np. waga w gramach) i niepoprawna data dają `None`, nie wyjątek;
+(6) deduplikacja po `id` zachowuje pierwsze wystąpienie i zwraca liczbę usuniętych.
