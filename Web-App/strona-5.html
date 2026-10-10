@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bajtomarket – katalog produktów, podstrona 5</title>
+<meta name="description" content="Fikcyjny katalog produktów przygotowany na Laboratorium nr 1 z przetwarzania języka naturalnego.">
+<!-- Jedyna informacja o zawartości: numer podstrony. Rekordów w tym pliku nie ma. -->
+<meta name="podstrona" content="5">
+<meta name="stron-lacznie" content="6">
+<link rel="stylesheet" href="/statyczne/styl.css">
+<script src="/statyczne/wspolne.js" defer></script>
+<script src="/statyczne/katalog.js" defer></script>
+</head>
+<body class="strona-katalogu">
+
+<header class="naglowek-serwisu">
+  <div class="pasek">
+    <a class="logo" href="/">Bajto<span>market</span></a>
+    <p class="haslo">Wszystko dla domu, biura i warsztatu</p>
+  </div>
+  <nav class="menu-dzialow" aria-label="Działy">
+    <ul>
+      <li><a href="/">Katalog</a></li>
+      <li><a href="/robots.txt">robots.txt</a></li>
+      <li><a href="/dane/katalog.json">Dane</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main class="tresc">
+  <h1 class="tytul-strony">Katalog produktów</h1>
+  <p class="podtytul" id="podsumowanie-strony">Trwa wczytywanie katalogu…</p>
+
+  <noscript>
+    <p class="komunikat komunikat-blad">Katalog jest budowany po stronie przeglądarki — bez włączonego
+      JavaScriptu zobaczysz wyłącznie ten komunikat. Dane pochodzą z plików
+      <code>dane/strona-5-porcja-&lt;numer&gt;.json</code>.</p>
+  </noscript>
+
+  <form class="filtry" id="filtry" autocomplete="off">
+    <label class="pole-filtra">
+      <span>Kategoria</span>
+      <select name="kategoria" id="filtr-kategoria">
+        <option value="">wszystkie</option>
+      </select>
+    </label>
+    <label class="pole-filtra">
+      <span>Sortowanie</span>
+      <select name="sort" id="filtr-sort">
+        <option value="domyslne">domyślne</option>
+        <option value="cena-rosnaco">cena rosnąco</option>
+        <option value="cena-malejaco">cena malejąco</option>
+        <option value="ocena-malejaco">ocena malejąco</option>
+        <option value="nazwa-rosnaco">nazwa A–Z</option>
+      </select>
+    </label>
+    <button type="button" class="przycisk przycisk-pomocniczy" id="wyczysc-filtry">Wyczyść</button>
+    <output class="stan-filtrow" id="stan-filtrow"></output>
+  </form>
+
+  <section class="sekcja-ofert" id="sekcja-tabeli" hidden>
+    <h2 class="tytul-sekcji">Oferty w tabeli</h2>
+    <div class="przewijak-tabeli" id="miejsce-tabeli"></div>
+  </section>
+
+  <section class="sekcja-ofert" id="sekcja-kart" hidden>
+    <h2 class="tytul-sekcji">Oferty w kartach</h2>
+    <div class="siatka-kart" id="miejsce-kart"></div>
+  </section>
+
+  <p class="komunikat komunikat-blad" id="komunikat-bledu" hidden></p>
+
+  <div class="sterowanie-doladowaniem">
+    <button type="button" class="przycisk przycisk-glowny" id="wczytaj-wiecej" hidden>Wczytaj więcej</button>
+    <p class="licznik-porcji" id="licznik-porcji" aria-live="polite"></p>
+  </div>
+
+  <nav class="paginacja" id="paginacja" aria-label="Podstrony katalogu"></nav>
+</main>
+
+<footer class="stopka">
+  <section class="informacje">
+    <h2>Zanim uruchomisz parser</h2>
+    <ul class="zasady">
+      <li>Przeczytaj <a href="/robots.txt">robots.txt</a> — opisuje zasady tego serwisu.</li>
+      <li>Zakoduj opóźnienie między żądaniami, nawet gdy serwis stoi na Twoim komputerze.</li>
+      <li>Dane są całkowicie fikcyjne i wygenerowane na potrzeby zajęć.</li>
+    </ul>
+    <p class="nota">Ceny podano w trzech walutach — tak jak bywa w serwisach sklejanych z kilku źródeł.</p>
+    <p class="nota">Stan katalogu: <time id="data-stanu"></time></p>
+  </section>
+  <p class="prawa">Bajtomarket © 2026 — serwis ćwiczeniowy, laboratorium nr 1.</p>
+</footer>
+
+</body>
+</html>

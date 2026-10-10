@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bajtomarket – karta produktu</title>
+<meta name="description" content="Karta produktu w fikcyjnym katalogu Bajtomarket.">
+<!-- Jedyna informacja o zawartości: identyfikator rekordu. Żadnego atrybutu tu nie ma. -->
+<meta name="produkt" content="P78228">
+<link rel="stylesheet" href="/statyczne/styl.css">
+<script src="/statyczne/wspolne.js" defer></script>
+<script src="/statyczne/produkt.js" defer></script>
+</head>
+<body class="strona-produktu">
+
+<header class="naglowek-serwisu">
+  <div class="pasek">
+    <a class="logo" href="/">Bajto<span>market</span></a>
+    <p class="haslo">Wszystko dla domu, biura i warsztatu</p>
+  </div>
+  <nav class="okruszki" id="okruszki" aria-label="Ścieżka nawigacji">
+    <a href="/">Katalog</a>
+  </nav>
+</header>
+
+<main class="tresc">
+  <noscript>
+    <p class="komunikat komunikat-blad">Karta produktu jest budowana po stronie przeglądarki.
+      Dane tego rekordu znajdują się w pliku <code>dane/produkt/P78228.json</code>.</p>
+  </noscript>
+
+  <p class="komunikat" id="komunikat-wczytywania">Wczytywanie karty produktu…</p>
+  <p class="komunikat komunikat-blad" id="komunikat-bledu" hidden></p>
+
+  <article class="karta-produktu" id="karta-produktu" hidden>
+    <header class="naglowek-produktu">
+      <h1 class="nazwa-produktu" id="nazwa-produktu"></h1>
+      <p class="identyfikator" id="identyfikator"></p>
+    </header>
+
+    <section class="podsumowanie" id="podsumowanie"></section>
+
+    <section class="zakladki" id="zakladki">
+      <div class="paski-zakladek" role="tablist" aria-label="Informacje o produkcie">
+        <button type="button" class="zakladka" role="tab" data-panel="opis" aria-selected="true">Opis</button>
+        <button type="button" class="zakladka" role="tab" data-panel="specyfikacja" aria-selected="false">Specyfikacja</button>
+        <button type="button" class="zakladka" role="tab" data-panel="dostawa" aria-selected="false">Dostawa i zwroty</button>
+      </div>
+      <div class="panel-zakladki" id="panel-opis" role="tabpanel"></div>
+      <div class="panel-zakladki" id="panel-specyfikacja" role="tabpanel" hidden></div>
+      <div class="panel-zakladki" id="panel-dostawa" role="tabpanel" hidden></div>
+    </section>
+  </article>
+</main>
+
+<footer class="stopka">
+  <p class="nota">Zakładki <em>Specyfikacja</em> oraz <em>Dostawa i zwroty</em> wypełniają się dopiero
+    przy pierwszym kliknięciu — przed interakcją ich treści nie ma w drzewie DOM.</p>
+  <p class="prawa">Bajtomarket © 2026 — serwis ćwiczeniowy, laboratorium nr 1.</p>
+</footer>
+
+</body>
+</html>

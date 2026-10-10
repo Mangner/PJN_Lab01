@@ -1,0 +1,11 @@
+# Bajtomarket – serwis ćwiczeniowy (Laboratorium nr 1, PJN).
+# Dane są fikcyjne, ale zasady obowiązują takie same jak w prawdziwym serwisie.
+
+User-agent: *
+Allow: /
+Allow: /produkt/
+Allow: /dane/
+Crawl-delay: 1
+
+# Serwis jest statyczny, więc nie odrzuci nadmiarowych żądań kodem 429 —
+# opóźnienie między żądaniami zakoduj po stronie parsera.

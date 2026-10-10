@@ -1,0 +1,342 @@
+/* Bajtomarket – warstwa prezentacji. Klasy pozostają semantyczne (produkt, cena,
+   dostepnosc…), a wygląd opiera się wyłącznie na nich – zmiana stylów nie wymaga
+   zmiany struktury dokumentu. */
+
+:root {
+  --tlo: #f4f6f9;
+  --tlo-plyty: #ffffff;
+  --tlo-delikatne: #eef1f6;
+  --tekst: #16202c;
+  --tekst-przygaszony: #5b6775;
+  --obramowanie: #d6dde7;
+  --akcent: #1d5fa8;
+  --akcent-tlo: #e5eefa;
+  --ostrzezenie: #9a2a2a;
+  --promocja: #0f7a4d;
+  --promien: 10px;
+  --cien: 0 1px 2px rgb(16 32 44 / 8%), 0 8px 24px rgb(16 32 44 / 6%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --tlo: #11161d;
+    --tlo-plyty: #19202a;
+    --tlo-delikatne: #212a36;
+    --tekst: #e6ebf2;
+    --tekst-przygaszony: #9aa7b7;
+    --obramowanie: #2c3745;
+    --akcent: #7db2f0;
+    --akcent-tlo: #1c2b3d;
+    --ostrzezenie: #f08a8a;
+    --promocja: #5cc795;
+    --cien: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px rgb(0 0 0 / 30%);
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--tlo);
+  color: var(--tekst);
+  font: 16px/1.55 "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+}
+
+a { color: var(--akcent); }
+code { font-family: "Cascadia Mono", Consolas, monospace; font-size: .9em; }
+
+/* ─── nagłówek ─── */
+
+.naglowek-serwisu {
+  background: var(--tlo-plyty);
+  border-bottom: 1px solid var(--obramowanie);
+  box-shadow: var(--cien);
+}
+
+.pasek {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 16px;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 14px 16px 10px;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  text-decoration: none;
+  color: var(--tekst);
+}
+.logo span { color: var(--akcent); }
+
+.haslo { margin: 0; color: var(--tekst-przygaszony); font-size: .92rem; }
+
+.menu-dzialow ul,
+.okruszki {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 16px 12px;
+  list-style: none;
+  font-size: .92rem;
+}
+
+/* ─── układ treści ─── */
+
+.tresc {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.tytul-strony { margin: 0 0 4px; font-size: 1.7rem; letter-spacing: -.02em; }
+.podtytul { margin: 0 0 20px; color: var(--tekst-przygaszony); font-size: .94rem; }
+.tytul-sekcji { margin: 28px 0 12px; font-size: 1.15rem; }
+
+.komunikat {
+  margin: 16px 0;
+  padding: 12px 14px;
+  border: 1px solid var(--obramowanie);
+  border-radius: var(--promien);
+  background: var(--tlo-delikatne);
+  font-size: .94rem;
+}
+.komunikat-blad { border-color: var(--ostrzezenie); color: var(--ostrzezenie); background: transparent; }
+
+/* ─── filtry ─── */
+
+.filtry {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--obramowanie);
+  border-radius: var(--promien);
+  background: var(--tlo-plyty);
+  box-shadow: var(--cien);
+}
+
+.pole-filtra { display: flex; flex-direction: column; gap: 4px; font-size: .84rem; }
+.pole-filtra span { color: var(--tekst-przygaszony); text-transform: uppercase; letter-spacing: .04em; }
+
+.pole-filtra select,
+.przycisk {
+  padding: 7px 12px;
+  border: 1px solid var(--obramowanie);
+  border-radius: 7px;
+  background: var(--tlo-plyty);
+  color: inherit;
+  font: inherit;
+  font-size: .94rem;
+}
+
+.przycisk { cursor: pointer; }
+.przycisk-glowny { background: var(--akcent); border-color: var(--akcent); color: #fff; font-weight: 600; }
+.przycisk:disabled { opacity: .55; cursor: progress; }
+.stan-filtrow { color: var(--tekst-przygaszony); font-size: .86rem; }
+
+/* ─── tabela ofert ─── */
+
+.przewijak-tabeli { overflow-x: auto; border-radius: var(--promien); box-shadow: var(--cien); }
+
+.tabela-ofert {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--tlo-plyty);
+  font-size: .9rem;
+}
+
+.tabela-ofert th,
+.tabela-ofert td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--obramowanie);
+  text-align: left;
+  vertical-align: top;
+}
+
+.tabela-ofert th {
+  position: sticky;
+  top: 0;
+  background: var(--tlo-delikatne);
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--tekst-przygaszony);
+}
+
+.tabela-ofert tr:hover td { background: var(--akcent-tlo); }
+.tabela-ofert .cena, .tabela-ofert .ocena, .tabela-ofert .liczba-opinii { white-space: nowrap; }
+
+/* ─── karty ─── */
+
+.siatka-kart {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.produkt,
+.oferta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 190px;
+  padding: 14px;
+  border: 1px solid var(--obramowanie);
+  border-radius: var(--promien);
+  background: var(--tlo-plyty);
+  box-shadow: var(--cien);
+  font-size: .9rem;
+}
+
+.produkt[data-stan-renderu="szkic"] {
+  align-items: center;
+  justify-content: center;
+  color: var(--tekst-przygaszony);
+  font-style: italic;
+}
+
+.nazwa-produktu,
+.tytul-oferty { margin: 0 0 8px; font-size: 1rem; line-height: 1.35; }
+.nazwa-produktu a, .tytul-oferty a { text-decoration: none; }
+.nazwa-produktu a:hover, .tytul-oferty a:hover { text-decoration: underline; }
+
+.atrybuty { display: flex; flex-direction: column; gap: 2px; }
+.atrybuty p, .para-wartosci { margin: 0; }
+
+.etykieta { color: var(--tekst-przygaszony); font-size: .8rem; }
+.para-wartosci .etykieta::after { content: ":"; }
+.para-wartosci .wartosc { margin-left: 4px; }
+
+.cena { font-weight: 600; }
+.cena-poprzednia { color: var(--promocja); text-decoration: line-through; }
+.brak-wartosci { color: var(--tekst-przygaszony); font-style: italic; }
+.dostepnosc { text-transform: lowercase; }
+
+.szczegoly-magazynowe {
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px dashed var(--obramowanie);
+  font-size: .86rem;
+}
+.szczegoly-magazynowe summary { cursor: pointer; color: var(--akcent); }
+
+.dane-magazynowe,
+.dane-podstawowe,
+.dane-specyfikacja,
+.dane-dostawa,
+.dane-oferty {
+  display: grid;
+  grid-template-columns: minmax(120px, max-content) 1fr;
+  gap: 2px 14px;
+  margin: 8px 0 0;
+}
+
+.dane-magazynowe dt, .dane-oferty dt, .dane-podstawowe dt,
+.dane-specyfikacja dt, .dane-dostawa dt { color: var(--tekst-przygaszony); font-size: .84rem; }
+dd { margin: 0; }
+
+/* ─── układ „lista” (podstrona 3) ─── */
+
+.miejsce-listy .lista-ofert { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+
+.pozycja-oferty {
+  padding: 14px;
+  border: 1px solid var(--obramowanie);
+  border-left: 4px solid var(--akcent);
+  border-radius: var(--promien);
+  background: var(--tlo-plyty);
+  box-shadow: var(--cien);
+  font-size: .9rem;
+}
+
+/* ─── układ „grupy” (podstrona 5) ─── */
+
+.grupa-kategorii { margin: 0 0 26px; }
+.nazwa-grupy {
+  margin: 0 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--akcent);
+  font-size: 1.05rem;
+}
+.oferty-grupy { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+
+/* ─── doładowywanie i paginacja ─── */
+
+.sterowanie-doladowaniem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: 26px 0 8px;
+}
+.licznik-porcji { margin: 0; color: var(--tekst-przygaszony); font-size: .88rem; }
+.czujnik-doladowania { height: 1px; }
+
+.paginacja { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 20px; }
+
+.paginacja .strona {
+  min-width: 38px;
+  padding: 7px 10px;
+  border: 1px solid var(--obramowanie);
+  border-radius: 7px;
+  background: var(--tlo-plyty);
+  text-align: center;
+  text-decoration: none;
+}
+.paginacja .strona-biezaca { background: var(--akcent); border-color: var(--akcent); color: #fff; font-weight: 600; }
+
+/* ─── karta produktu ─── */
+
+.karta-produktu {
+  padding: 22px;
+  border: 1px solid var(--obramowanie);
+  border-radius: var(--promien);
+  background: var(--tlo-plyty);
+  box-shadow: var(--cien);
+}
+.naglowek-produktu .nazwa-produktu { font-size: 1.5rem; }
+.identyfikator { margin: 0 0 18px; color: var(--tekst-przygaszony); font-size: .86rem; }
+
+.paski-zakladek { display: flex; flex-wrap: wrap; gap: 6px; margin: 26px 0 0; border-bottom: 1px solid var(--obramowanie); }
+
+.zakladka {
+  padding: 9px 16px;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  background: transparent;
+  color: var(--tekst-przygaszony);
+  font: inherit;
+  font-size: .94rem;
+  cursor: pointer;
+}
+.zakladka[aria-selected="true"] {
+  border-color: var(--obramowanie);
+  background: var(--tlo-delikatne);
+  color: var(--tekst);
+  font-weight: 600;
+}
+
+.panel-zakladki { padding: 16px 2px 2px; }
+.panel-zakladki p { margin: 0 0 10px; }
+
+/* ─── stopka ─── */
+
+.stopka {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+  border-top: 1px solid var(--obramowanie);
+  color: var(--tekst-przygaszony);
+  font-size: .88rem;
+}
+.informacje h2 { font-size: 1rem; color: var(--tekst); }
+.zasady { padding-left: 20px; }
+.nota, .prawa { margin: 8px 0 0; }

@@ -1,0 +1,57 @@
+{
+ "serwis": "Bajtomarket",
+ "opis": "Fikcyjne dane wygenerowane na potrzeby Laboratorium nr 1 (PJN).",
+ "data_stanu": "2026-10-06",
+ "liczba_produktow": 420,
+ "rozmiar_porcji": 12,
+ "kategorie": [
+  "AGD",
+  "Dom i ogród",
+  "Komputery",
+  "Kuchnia",
+  "Narzędzia",
+  "RTV i audio",
+  "Sport i turystyka",
+  "Telefony i akcesoria",
+  "Zabawki",
+  "Zdrowie i uroda"
+ ],
+ "strony": [
+  {
+   "numer": 1,
+   "adres": "index.html",
+   "pozycji": 72,
+   "porcji": 6
+  },
+  {
+   "numer": 2,
+   "adres": "strona-2.html",
+   "pozycji": 72,
+   "porcji": 6
+  },
+  {
+   "numer": 3,
+   "adres": "strona-3.html",
+   "pozycji": 72,
+   "porcji": 6
+  },
+  {
+   "numer": 4,
+   "adres": "strona-4.html",
+   "pozycji": 72,
+   "porcji": 6
+  },
+  {
+   "numer": 5,
+   "adres": "strona-5.html",
+   "pozycji": 72,
+   "porcji": 6
+  },
+  {
+   "numer": 6,
+   "adres": "strona-6.html",
+   "pozycji": 72,
+   "porcji": 6
+  }
+ ]
+}
