@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(pytest:*)",
+      "Bash(ruff:*)"
+    ],
+    "deny": [
+      "Bash(git push:*)",
+      "Read(../Web-App/klucz/**)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "py -3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/blokuj_sleep.py\""
+          },
+          {
+            "type": "command",
+            "command": "py -3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/blokuj_import_selenium.py\""
+          }
+        ]
+      }
+    ]
+  }
+}
