@@ -33,3 +33,16 @@ PLN/EUR dziesiętny (`1 299,00 zł`); (3) prefiks `<span class="etykieta">` z ka
 warstwa `pages/`, nie `parsing/`; (4) `gratis` w koszcie dostawy to `0.0` bez waluty;
 (5) nieznana jednostka (np. waga w gramach) i niepoprawna data dają `None`, nie wyjątek;
 (6) deduplikacja po `id` zachowuje pierwsze wystąpienie i zwraca liczbę usuniętych.
+
+## Faza 3: infrastruktura
+Całe czekanie na sztywno jest w `utils/timing.py` i przechodzi przez podmienialną funkcję,
+więc testy retry i pauz nie czekają naprawdę; dekorator `@ponawiaj` łapie tylko trzy wyjątki
+Selenium (backoff 1, 2, 4 s, 4 próby) i stoi wyłącznie na metodach najwyższego poziomu, żeby
+próby się nie mnożyły, a diagnostyka (.png + .html) zapisywała się raz. `BasePage.tekst()` łapie
+tylko `NoSuchElementException`, bo `TimeoutException` nie może udawać braku danych, a
+`otworz()` robi pauzę grzecznościową 0,5 s przed każdym żądaniem poza pierwszym w sesji.
+Testy: 135 pytest (bez Chrome'a). Weryfikacja w Chrome: `data-wczytano=12` po otwarciu `/`
+w obu trybach, `pl-PL`, okno 1366x900; celowo nieistniejący selektor dał 4 próby,
+opóźnienia 1/2/4 s, 3 retry i jedną parę plików diagnostycznych; przebieg z tą operacją trwał
+19,66 s (okno) i 18,43 s (headless), więc różnicy trybów nie da się jeszcze ocenić.
+
