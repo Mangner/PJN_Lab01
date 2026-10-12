@@ -46,3 +46,22 @@ w obu trybach, `pl-PL`, okno 1366x900; celowo nieistniejący selektor dał 4 pr�
 opóźnienia 1/2/4 s, 3 retry i jedną parę plików diagnostycznych; przebieg z tą operacją trwał
 19,66 s (okno) i 18,43 s (headless), więc różnicy trybów nie da się jeszcze ocenić.
 
+## Faza 4: CatalogPage
+**Zbieranie rekordów:** wybrano jedno `execute_script` zamiast klasycznego `find_element`
+dla każdego pola. Wariant klasyczny to ok. 900 wywołań WebDrivera na podstronę (72 rekordy x 13
+pól, ok. 5400 na przebieg) i ryzyko `StaleElementReferenceException` przy przerysowaniu DOM-u w
+trakcie czytania; wariant ze skryptem to 1 wywołanie i atomowa migawka. Kosztem jest mniej
+czytelny JS w stringu, więc skrypt jest statyczny, a selektory przekazuje Python (`arguments[0]`
+ze stałych klasy), co zachowuje zasadę „selektory na górze klasy”. Strona nadal zwraca surowe
+stringi; jedyna ingerencja to wycięcie `span.etykieta` z kart.
+**Doładowywanie:** pętla czeka na WZROST `data-wczytano` (nie na migoczące `data-wczytywanie`),
+kończy się przy `data-porcja == data-porcji-lacznie`, ma twardy limit 20 iteracji, a ponawianie
+jest per porcja (`@ponawiaj` na `wczytaj_porcje`, pętla bez dekoratora). Liczbę podstron
+(6) ustala `liczba_podstron()` z linków `a[href*="strona-"]`, nie stała.
+**Liczby (podstrony 1 i 2, headless):** po 72 rekordy (30 tabela + 42 karta), 72 unikalne `id`,
+`data-porcja` 6/6, 0 retry; czas otwarcia, doładowania 5 porcji i zebrania rekordów 9,93 s
+(podstrona 1) i 13,43 s (podstrona 2). Braki w surowych danych na podstronie 1 / 2:
+`cena_poprzednia` pusta w tabeli 19 / 26 i nieobecna w kartach 35 / 34 (brak promocji, nie brak
+danych), `producent` `—` 17 / 14, `ocena` `—` 16 / 12. Odchylenie od README: `gwarancja` też
+bywa `—` (6 na każdej z tych podstron); `czysc_gwarancje("—")` daje `None`, więc to nie wymaga zmian.
+

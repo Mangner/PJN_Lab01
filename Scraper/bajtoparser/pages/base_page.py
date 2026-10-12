@@ -84,9 +84,8 @@ class BasePage:
             ignored_exceptions=(NoSuchElementException, StaleElementReferenceException),
         )
 
-    @ponawiaj()
-    def otworz(self, url: str) -> None:
-        """Otwiera adres URL (z retry przy przekroczeniu czasu ładowania).
+    def _otworz(self, url: str) -> None:
+        """Otwiera adres URL bez retry (do użycia w metodach z własnym `@ponawiaj`).
 
         Przed każdym żądaniem poza pierwszym w sesji (na danym driverze) robi pauzę
         grzecznościową; dotyczy to także ponowień po błędzie.
@@ -95,6 +94,11 @@ class BasePage:
             timing.pauza_grzecznosciowa()
         _STEROWNIKI_Z_ZADANIEM.add(self.driver)
         self.driver.get(url)
+
+    @ponawiaj()
+    def otworz(self, url: str) -> None:
+        """Otwiera adres URL (z retry przy przekroczeniu czasu ładowania)."""
+        self._otworz(url)
 
     def czekaj_na_element(self, lokator: Lokator, widoczny: bool = False) -> WebElement:
         """Czeka na obecność (lub widoczność) elementu i zwraca go."""
@@ -119,10 +123,14 @@ class BasePage:
         """Czeka, aż atrybut liczbowy przekroczy `poczatkowa`; zwraca nową wartość."""
         return self.wait.until(_WzrostAtrybutu(lokator, atrybut, poczatkowa))
 
+    def _kliknij(self, lokator: Lokator) -> None:
+        """Czeka, aż element będzie klikalny, i klika go (bez retry)."""
+        self.wait.until(EC.element_to_be_clickable(lokator)).click()
+
     @ponawiaj()
     def kliknij(self, lokator: Lokator) -> None:
         """Czeka, aż element będzie klikalny, i klika go (z retry)."""
-        self.wait.until(EC.element_to_be_clickable(lokator)).click()
+        self._kliknij(lokator)
 
     def tekst(self, lokator: Lokator, domyslny: str | None = None) -> str | None:
         """Zwraca tekst elementu albo `domyslny`, gdy elementu nie ma w DOM (bez czekania).
