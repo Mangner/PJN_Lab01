@@ -70,13 +70,26 @@ def wylacz_logowanie() -> None:
 
 @dataclass
 class PodsumowaniePrzebiegu:
-    """Podsumowanie przebiegu: strony, rekordy, błędy, retry, czas działania i tryb."""
+    """Podsumowanie przebiegu: strony, rekordy, błędy, retry, czas działania i tryb.
+
+    `rekordy` to liczba rekordów w eksporcie; pola dodatkowe opisują kontrolę jakości:
+    pozycje na liście przed i po deduplikacji, duplikaty różniące się od oryginału,
+    nierozpoznane wartości (nieznany format, nie brak danych) i produkty ze szczegółami.
+    """
 
     tryb: str
     strony: int = 0
     rekordy: int = 0
     bledy: int = 0
     retry: int = 0
+    rekordy_lista: int = 0
+    rekordy_po_dedup: int = 0
+    duplikaty: int = 0
+    duplikaty_rozne: int = 0
+    nierozpoznane: int = 0
+    ze_szczegolami: int = 0
+    pominiete_strony: list[int] = field(default_factory=list)
+    przerwano: bool = False
     zegar: Callable[[], float] = field(default=time.perf_counter, repr=False)
     _start: float = field(init=False, repr=False)
     _koniec: float | None = field(default=None, init=False, repr=False)
@@ -99,7 +112,12 @@ class PodsumowaniePrzebiegu:
         """Zwraca podsumowanie w jednej linii."""
         return (
             f"PODSUMOWANIE: tryb={self.tryb}, stron={self.strony}, rekordów={self.rekordy}, "
-            f"błędów={self.bledy}, retry={self.retry}, czas={self.czas_s:.2f} s"
+            f"błędów={self.bledy}, retry={self.retry}, czas={self.czas_s:.2f} s; "
+            f"lista={self.rekordy_lista}, po deduplikacji={self.rekordy_po_dedup}, "
+            f"duplikatów={self.duplikaty} (różnych od oryginału: {self.duplikaty_rozne}), "
+            f"ze szczegółami={self.ze_szczegolami}, nierozpoznanych={self.nierozpoznane}, "
+            f"pominięte podstrony={self.pominiete_strony or '-'}, "
+            f"przerwano={'tak' if self.przerwano else 'nie'}"
         )
 
     def zapisz_do_logu(self, logger: logging.Logger | None = None) -> None:

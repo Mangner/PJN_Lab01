@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Any
 
 
@@ -25,3 +26,28 @@ def deduplikuj(
         widziane.add(wartosc)
         unikalne.append(rekord)
     return unikalne, len(rekordy) - len(unikalne)
+
+
+def rozne_duplikaty(
+    rekordy: list[dict[str, Any]],
+    klucz: str = "id",
+    porownywane: Callable[[dict[str, Any]], Any] | None = None,
+) -> list[Any]:
+    """Zwraca wartości klucza duplikatów, które różnią się od pierwszego wystąpienia.
+
+    `porownywane` sprowadza rekord do postaci porównywanej (np. oczyszczone pola listy),
+    żeby różnice samego zapisu (pusta komórka `""` w tabeli vs brak elementu w karcie)
+    nie liczyły się jako różnica. Każde id występuje w wyniku najwyżej raz.
+    """
+    postac = porownywane or (lambda rekord: rekord)
+    pierwsze: dict[Any, Any] = {}
+    rozne: list[Any] = []
+    for rekord in rekordy:
+        wartosc = rekord.get(klucz)
+        if wartosc in (None, ""):
+            continue
+        if wartosc not in pierwsze:
+            pierwsze[wartosc] = postac(rekord)
+        elif postac(rekord) != pierwsze[wartosc] and wartosc not in rozne:
+            rozne.append(wartosc)
+    return rozne

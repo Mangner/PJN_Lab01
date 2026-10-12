@@ -73,10 +73,12 @@ class BasePage:
         driver: WebDriver,
         timeout_s: float | None = None,
         poll_s: float | None = None,
+        pauza_s: float | None = None,
     ) -> None:
         self.driver = driver
         self.timeout_s = KONFIGURACJA.timeout_s if timeout_s is None else timeout_s
         self.poll_s = KONFIGURACJA.poll_s if poll_s is None else poll_s
+        self.pauza_s = KONFIGURACJA.pauza_s if pauza_s is None else pauza_s
         self.wait = WebDriverWait(
             driver,
             self.timeout_s,
@@ -91,7 +93,7 @@ class BasePage:
         grzecznościową; dotyczy to także ponowień po błędzie.
         """
         if self.driver in _STEROWNIKI_Z_ZADANIEM:
-            timing.pauza_grzecznosciowa()
+            timing.pauza_grzecznosciowa(self.pauza_s)
         _STEROWNIKI_Z_ZADANIEM.add(self.driver)
         self.driver.get(url)
 

@@ -81,3 +81,30 @@ i wyjątkiem dla pipeline'u. Nagłówek `#karta-produktu` nie wnosi nowych atryb
 13/13 pól niepustych w każdym z 20 produktów (na tej próbce brak `—` w polach szczegółów),
 nazwa i kategoria z nagłówka zgodne z listą w 5/5 produktów.
 
+
+## Faza 6: pipeline, CLI, eksport
+**Polityka błędów w pipeline:** Page Objecty niczego nie połykają; pipeline łapie tylko wyjątki,
+które zostają po wyczerpaniu retry (`WYJATKI_PONAWIANE`), liczy je jako błędy i idzie dalej.
+Błąd produktu zostawia rekord z samymi danymi z listy (szczegóły `None`); błąd w trakcie
+doładowywania podstrony pomija ją w całości (bez częściowych rekordów, numer w logu); błąd
+otwarcia podstrony 1 jest krytyczny (bez niej nie wiadomo, ile jest podstron). Deduplikacja
+po `id` jest PRZED wejściem w szczegóły, więc duplikaty nie generują żądań. Kody wyjścia:
+0 sukces, 1 błędy częściowe lub Ctrl+C, 2 błąd krytyczny (np. serwis nie odpowiada: sprawdzenie
+jednym żądaniem `urllib`, Chrome się nie uruchamia).
+**Kontrola „nierozpoznanych”:** wartość, która nie była brakiem (`—`, pusta), a po czyszczeniu
+wyszła `None`, jest liczona i logowana (jeden WARNING na rekord z listą pól). Dzięki temu błąd
+parsera (nieznany format) nie udaje braku danych. Zapis w locie: każdy rekord (surowy + szczegóły)
+trafia od razu do `<wyjscie>_surowe.jsonl`; CSV i JSON zapisują się na końcu, także po Ctrl+C.
+**Format wyjścia:** 30 kolumn w stałej kolejności (`parsing/rekord.py: KOLUMNY`): 26 atrybutów
+serwisu, z czego cena rozbita na `cena` + `waluta`, wymiary na `dlugosc_cm`/`szerokosc_cm`/
+`wysokosc_cm`, koszt dostawy na `koszt_dostawy` + `waluta_dostawy` (gratis = 0.0 PLN), plus
+`zrodlo` (tabela/karta). Liczby całkowite jako `Int64` (bez 25 -> 25.0), `ean` jako tekst.
+**Liczby (headless):** `--strony 1 --limit 5`: 5 rekordów, 30 kolumn, 0 błędów, 14,19 s.
+`--strony 2`: 144 pozycje na liście -> 143 po deduplikacji (1 duplikat, 0 różnych od oryginału),
+143/143 ze szczegółami, 0 błędów, 0 retry, 0 nierozpoznanych, 113,88 s (ok. 0,64 s na produkt).
+Waluty: 124 PLN / 11 EUR / 8 USD; źródło: 60 tabela / 83 karta; dostawa gratis: 39. Braki
+(wszystkie to `—` w surowych danych): producent 31, ocena 27, gwarancja 12, waga 9;
+`cena_poprzednia` pusta w 113 (brak promocji). Testy: 219 pytest (84 nowe), bez Chrome'a.
+Kod wyjścia 2 przy niedostępnym serwisie jest pokryty testem jednostkowym (podmieniony
+`serwis_odpowiada`, zamknięty port 127.0.0.1:1); próba z faktycznie zatrzymanym serwerem
+na porcie 8000 do wykonania na początku fazy 7.

@@ -121,8 +121,9 @@ class ProductPage(BasePage):
         adres_serwisu: str | None = None,
         timeout_s: float | None = None,
         poll_s: float | None = None,
+        pauza_s: float | None = None,
     ) -> None:
-        super().__init__(driver, timeout_s=timeout_s, poll_s=poll_s)
+        super().__init__(driver, timeout_s=timeout_s, poll_s=poll_s, pauza_s=pauza_s)
         self.adres_serwisu = adres_serwisu or KONFIGURACJA.adres_serwisu
 
     @ponawiaj()

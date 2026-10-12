@@ -140,8 +140,9 @@ class CatalogPage(BasePage):
         adres_serwisu: str | None = None,
         timeout_s: float | None = None,
         poll_s: float | None = None,
+        pauza_s: float | None = None,
     ) -> None:
-        super().__init__(driver, timeout_s=timeout_s, poll_s=poll_s)
+        super().__init__(driver, timeout_s=timeout_s, poll_s=poll_s, pauza_s=pauza_s)
         self.adres_serwisu = adres_serwisu or KONFIGURACJA.adres_serwisu
 
     @ponawiaj()
@@ -173,7 +174,7 @@ class CatalogPage(BasePage):
         if self.czy_wczytano_wszystko():
             return int(self.pobierz_atrybut(self.BODY, self.ATR_WCZYTANO) or 0)
         poczatkowa = int(self.pobierz_atrybut(self.BODY, self.ATR_WCZYTANO) or 0)
-        timing.pauza_grzecznosciowa()  # kliknięcie wyzwala fetch
+        timing.pauza_grzecznosciowa(self.pauza_s)  # kliknięcie wyzwala fetch
         self._kliknij(self.PRZYCISK_WCZYTAJ)
         return self.czekaj_na_wzrost_atrybutu(self.BODY, self.ATR_WCZYTANO, poczatkowa)
 
