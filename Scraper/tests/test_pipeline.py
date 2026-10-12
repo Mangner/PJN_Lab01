@@ -269,3 +269,17 @@ def test_podsumowanie_w_logu(konfiguracja, caplog):
     with caplog.at_level(logging.INFO, logger="bajtoparser"):
         uruchom(AtrapaKatalogu({1: [pozycja("A")]}), AtrapaProduktu(), konfiguracja)
     assert any(r.message.startswith("PODSUMOWANIE") for r in caplog.records)
+
+
+def test_podsumowanie_ma_dane_dom_do_porownania(konfiguracja):
+    katalog = AtrapaKatalogu(
+        {
+            1: [pozycja("A"), pozycja("B", zrodlo="karta")],
+            2: [pozycja("A", zrodlo="karta"), pozycja("C")],
+        }
+    )
+    p = uruchom(katalog, AtrapaProduktu(), konfiguracja, limit=2)
+    assert p.podstrony_w_serwisie == 2
+    assert p.pozycje_zrodlo == {"tabela": 2, "karta": 2}
+    assert [r["id"] for r in p.probka_produktow] == ["A", "B"]  # po limit
+    assert p.probka_produktow[0]["url"] == "/produkt/A.html"

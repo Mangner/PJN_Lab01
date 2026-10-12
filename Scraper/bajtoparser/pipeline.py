@@ -7,6 +7,7 @@ wyjątki, które zostają po wyczerpaniu retry (`WYJATKI_PONAWIANE`), liczy je i
 
 import json
 import logging
+from collections import Counter
 from pathlib import Path
 from typing import Any, Protocol
 
@@ -44,6 +45,9 @@ class Pipeline:
 
     CO_ILE_POSTEP = 25
     """Co ile produktów logować postęp."""
+
+    ROZMIAR_PROBKI = 10
+    """Ile pierwszych produktów trafia do próby porównania surowego HTML z DOM."""
 
     def __init__(
         self,
@@ -94,6 +98,7 @@ class Pipeline:
         dostepne = self.katalog.liczba_podstron()
         limit = self.konfiguracja.strony
         liczba = dostepne if limit is None else min(limit, dostepne)
+        podsumowanie.podstrony_w_serwisie = dostepne
         log.info("Podstron w serwisie: %d, do przetworzenia: %d", dostepne, liczba)
 
         rekordy: list[dict[str, Any]] = []
@@ -116,6 +121,7 @@ class Pipeline:
             podsumowanie.strony += 1
             log.info("Podstrona %d/%d: %d pozycji", nr, liczba, len(z_podstrony))
         podsumowanie.rekordy_lista = len(rekordy)
+        podsumowanie.pozycje_zrodlo = dict(Counter(r.get("zrodlo") or "?" for r in rekordy))
         return rekordy
 
     def _deduplikuj(
@@ -135,7 +141,12 @@ class Pipeline:
                 ", ".join(map(str, rozne)),
             )
         limit = self.konfiguracja.limit
-        return unikalne if limit is None else unikalne[:limit]
+        wybrane = unikalne if limit is None else unikalne[:limit]
+        podsumowanie.probka_produktow = [
+            {"id": r.get("id"), "nazwa": r.get("nazwa"), "url": r.get("url")}
+            for r in wybrane[: self.ROZMIAR_PROBKI]
+        ]
+        return wybrane
 
     def _przetworz_produkty(
         self,

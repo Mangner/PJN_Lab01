@@ -41,6 +41,26 @@ def test_podsumowanie_zawiera_wszystkie_pola():
         assert fragment in tekst
 
 
+def test_linia_przebiegu_ma_tryb_czas_i_czas_na_rekord(caplog):
+    czasy = iter([0.0, 113.88])
+    p = PodsumowaniePrzebiegu(tryb="okno", zegar=lambda: next(czasy))
+    p.rekordy = 143
+    p.zakoncz()
+    linia = p.linia_przebiegu()
+    assert linia.startswith("PRZEBIEG: tryb=okno | czas=113.88 s (01:54)")
+    assert "rekordów=143" in linia and "s/rekord=0.80" in linia
+
+    with caplog.at_level(logging.INFO, logger=__name__):
+        p.zapisz_do_logu(logging.getLogger(__name__))
+    assert [r.message.split(":")[0] for r in caplog.records] == ["PODSUMOWANIE", "PRZEBIEG"]
+
+
+def test_linia_przebiegu_bez_rekordow_nie_dzieli_przez_zero():
+    p = PodsumowaniePrzebiegu(tryb="headless")
+    p.zakoncz()
+    assert "s/rekord=-" in p.linia_przebiegu()
+
+
 def test_nazwa_trybu():
     assert nazwa_trybu(False) == "okno"
     assert nazwa_trybu(True) == "headless"

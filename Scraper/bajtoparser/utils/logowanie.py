@@ -88,6 +88,9 @@ class PodsumowaniePrzebiegu:
     duplikaty_rozne: int = 0
     nierozpoznane: int = 0
     ze_szczegolami: int = 0
+    podstrony_w_serwisie: int = 0
+    pozycje_zrodlo: dict[str, int] = field(default_factory=dict)
+    probka_produktow: list[dict[str, str | None]] = field(default_factory=list)
     pominiete_strony: list[int] = field(default_factory=list)
     przerwano: bool = False
     zegar: Callable[[], float] = field(default=time.perf_counter, repr=False)
@@ -120,6 +123,18 @@ class PodsumowaniePrzebiegu:
             f"przerwano={'tak' if self.przerwano else 'nie'}"
         )
 
+    def linia_przebiegu(self) -> str:
+        """Zwraca wyraźną linię trybu i czasu do zestawiania przebiegów (okno vs headless)."""
+        czas = self.czas_s
+        minuty, sekundy = divmod(round(czas), 60)
+        na_rekord = f"{czas / self.rekordy:.2f}" if self.rekordy else "-"
+        return (
+            f"PRZEBIEG: tryb={self.tryb} | czas={czas:.2f} s ({minuty:02d}:{sekundy:02d}) | "
+            f"rekordów={self.rekordy} | s/rekord={na_rekord}"
+        )
+
     def zapisz_do_logu(self, logger: logging.Logger | None = None) -> None:
-        """Zapisuje podsumowanie do logu."""
-        (logger or log).info(self.jako_tekst())
+        """Zapisuje podsumowanie i linię trybu/czasu do logu."""
+        cel = logger or log
+        cel.info(self.jako_tekst())
+        cel.info(self.linia_przebiegu())

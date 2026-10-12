@@ -5,7 +5,12 @@ from pathlib import Path
 import pytest
 
 from bajtoparser import cli
-from bajtoparser.utils.logowanie import skonfiguruj_logowanie, wylacz_logowanie
+from bajtoparser.porownanie import StronaHtml, WynikPorownania
+from bajtoparser.utils.logowanie import (
+    PodsumowaniePrzebiegu,
+    skonfiguruj_logowanie,
+    wylacz_logowanie,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -70,6 +75,67 @@ def test_serwis_niedostepny_kod_2_bez_chrome(monkeypatch, caplog):
 
 def test_serwis_odpowiada_false_dla_zamknietego_portu():
     assert cli.serwis_odpowiada("http://127.0.0.1:1/", timeout_s=0.5) is False
+
+
+class _AtrapaDrivera:
+    def __enter__(self):
+        return object()
+
+    def __exit__(self, *args):
+        return False
+
+
+def _przygotuj_przebieg(monkeypatch, bledy=0):
+    """Podmienia serwis, driver, strony i pipeline; zwraca listę kolejności zdarzeń."""
+    zdarzenia: list[str] = []
+    podsumowanie = PodsumowaniePrzebiegu(tryb="headless")
+    podsumowanie.strony = 1
+    podsumowanie.rekordy = 3
+    podsumowanie.bledy = bledy
+    podsumowanie.probka_produktow = [{"id": "A", "nazwa": "Produkt A", "url": "/produkt/A.html"}]
+
+    class AtrapaPipeline:
+        def __init__(self, *args):
+            pass
+
+        def uruchom(self):
+            zdarzenia.append("przebieg")
+            return podsumowanie
+
+    monkeypatch.setattr(cli, "serwis_odpowiada", lambda adres: True)
+    monkeypatch.setattr(cli, "otworz_driver", lambda *a, **k: _AtrapaDrivera())
+    monkeypatch.setattr(cli, "CatalogPage", lambda *a, **k: None)
+    monkeypatch.setattr(cli, "ProductPage", lambda *a, **k: None)
+    monkeypatch.setattr(cli, "Pipeline", AtrapaPipeline)
+    return zdarzenia
+
+
+def test_porownanie_po_przebiegu_nie_zmienia_kodu_wyjscia(monkeypatch, tmp_path):
+    zdarzenia = _przygotuj_przebieg(monkeypatch)
+
+    def atrapa_porownaj(adres, liczba_podstron, probka, **kwargs):
+        zdarzenia.append("porownanie")
+        assert (liczba_podstron, [p["id"] for p in probka]) == (1, ["A"])
+        return WynikPorownania(podstrony=[StronaHtml(url="u", pobrano=False)])  # błąd sieci
+
+    monkeypatch.setattr(cli, "porownaj", atrapa_porownaj)
+    kod = cli.main(
+        ["--porownanie", "--katalog-wyjscia", str(tmp_path), "--wyjscie", "t", "--strony", "1"]
+    )
+
+    assert kod == cli.KOD_SUKCES
+    assert zdarzenia == ["przebieg", "porownanie"]
+    assert (tmp_path / "t_porownanie.json").exists()
+
+
+def test_bez_flagi_porownanie_nie_jest_uruchamiane(monkeypatch):
+    _przygotuj_przebieg(monkeypatch)
+
+    def zakazane(*args, **kwargs):
+        raise AssertionError("porównanie nie powinno się uruchomić")
+
+    monkeypatch.setattr(cli, "porownaj", zakazane)
+    assert cli.main([]) == cli.KOD_SUKCES
 
 
 def test_blad_krytyczny_daje_kod_2(monkeypatch):

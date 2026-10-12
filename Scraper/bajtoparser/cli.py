@@ -14,13 +14,20 @@ from pathlib import Path
 from bajtoparser.pages.catalog_page import CatalogPage
 from bajtoparser.pages.product_page import ProductPage
 from bajtoparser.pipeline import Pipeline
+from bajtoparser.porownanie import (
+    DaneDom,
+    linia_porownania,
+    porownaj,
+    wniosek,
+    zapisz_json,
+)
 from bajtoparser.utils.driver import otworz_driver
 from bajtoparser.utils.konfiguracja import (
     KONFIGURACJA,
     MIN_PAUZA_GRZECZNOSCIOWA_S,
     Konfiguracja,
 )
-from bajtoparser.utils.logowanie import skonfiguruj_logowanie
+from bajtoparser.utils.logowanie import PodsumowaniePrzebiegu, skonfiguruj_logowanie
 
 log = logging.getLogger("bajtoparser.cli")
 
@@ -78,6 +85,11 @@ def zbuduj_parser() -> argparse.ArgumentParser:
         help="liczba unikalnych produktów do przetworzenia (domyślnie wszystkie)",
     )
     parser.add_argument("--headless", action="store_true", help="Chrome bez okna")
+    parser.add_argument(
+        "--porownanie",
+        action="store_true",
+        help="po przebiegu porównaj liczbę rekordów w surowym HTML (urllib) z DOM",
+    )
     parser.add_argument(
         "--wyjscie",
         default=KONFIGURACJA.nazwa_wyjscia,
@@ -173,6 +185,33 @@ def main(argv: Sequence[str] | None = None) -> int:
         log.exception("Błąd krytyczny, przebieg przerwany")
         return KOD_BLAD_KRYTYCZNY
 
+    if argumenty.porownanie:
+        _porownaj_html_z_dom(konfiguracja, podsumowanie)
+
     if podsumowanie.bledy or podsumowanie.przerwano:
         return KOD_BLEDY_CZESCIOWE
     return KOD_SUKCES
+
+
+def _porownaj_html_z_dom(konfiguracja: Konfiguracja, podsumowanie: PodsumowaniePrzebiegu) -> None:
+    """Zestawia surowy HTML (urllib) z liczbami DOM z przebiegu i zapisuje JSON.
+
+    Dodatek do przebiegu: błąd sieci daje ostrzeżenie w logu i nie zmienia kodu wyjścia.
+    Czas porównania nie wchodzi do czasu przebiegu (jest liczony po jego zakończeniu).
+    """
+    przetworzone = podsumowanie.strony + len(podsumowanie.pominiete_strony)
+    wynik = porownaj(
+        konfiguracja.adres_serwisu,
+        max(przetworzone, 1),
+        podsumowanie.probka_produktow,
+        timeout_s=konfiguracja.timeout_s,
+        pauza_s=konfiguracja.pauza_s,
+    )
+    dom = DaneDom.z_podsumowania(podsumowanie)
+    linia = linia_porownania(wynik, dom)
+    sciezka = zapisz_json(wynik, dom, konfiguracja.katalog_wyjscia, konfiguracja.nazwa_wyjscia)
+    log.info(linia)
+    log.info("WNIOSEK: %s", wniosek(wynik, dom))
+    log.info("Porównanie zapisano do %s", sciezka)
+    if wynik.bledy_sieci:
+        log.warning("Porównanie niepełne: %d stron nie pobrano", wynik.bledy_sieci)

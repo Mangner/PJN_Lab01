@@ -108,3 +108,77 @@ Waluty: 124 PLN / 11 EUR / 8 USD; źródło: 60 tabela / 83 karta; dostawa grati
 Kod wyjścia 2 przy niedostępnym serwisie jest pokryty testem jednostkowym (podmieniony
 `serwis_odpowiada`, zamknięty port 127.0.0.1:1); próba z faktycznie zatrzymanym serwerem
 na porcie 8000 do wykonania na początku fazy 7.
+
+## Faza 7: porównanie surowego HTML z DOM (przygotowanie przebiegów)
+**Decyzje:** moduł `porownanie.py` pobiera HTML przez `urllib` i liczy rekordy parserem `html.parser`
+(po tokenach atrybutu `class` i po atrybucie `data-id`), a nie wyrażeniem regularnym: treść
+`<script>` jest pomijana, więc napis `data-id` w kodzie JS nie zawyża liczby, a klasa
+`wiersz-produktu` nie jest liczona jako `produkt`. Liczby DOM pochodzą z podsumowania tego samego
+przebiegu (lista, po deduplikacji, CSV, tabela/karty), więc nie ma drugiej przeglądarki; porównanie
+liczy się po zamknięciu Chrome'a i nie wchodzi do czasu przebiegu. Błąd sieci daje stronę z
+`pobrano=False` i ostrzeżenie, bez zmiany kodu wyjścia. Identyfikator produktu raportowany jest
+dwoma polami: `id_w_html` (w treści, poza `<script>/<style>/<noscript>`, albo jako `data-id`) i
+`id_gdziekolwiek` (gdziekolwiek w dokumencie).
+**Obserwacja z próby (3 produkty, nie wchodzi do tabel poniżej):** w surowym HTML strony produktu
+identyfikator występuje tylko w `<meta name="produkt">` i w `<noscript>` jako wskazówka
+`dane/produkt/<id>.json`; nazwy nie ma wcale (`h1#nazwa-produktu` jest pusty). Wskazówka dotyczy
+opcjonalnego rozszerzenia (źródło danych JSON w `dane/`, patrz WYMAGANIA.md).
+**Weryfikacja lekka** (`--strony 1 --limit 3 --headless --porownanie`): kod wyjścia 0,
+surowy HTML `index.html` 3952 B, 0/0/0 (`wiersz-produktu`/`produkt`/`data-id`), 2 `<script>`;
+DOM 72 pozycje (30 tabela + 42 karty), 3 rekordy w CSV; strony produktów 2770 B, 0/3 z nazwą i id
+w treści. Testy: 240 pytest (bez Chrome'a i sieci).
+
+### Tabela A: surowy HTML vs DOM (pełny przebieg, 6 podstron)
+Źródło: `output/okno_porownanie.json`, `output/headless_porownanie.json` (identyczne liczby w
+obu trybach) i linia `POROWNANIE:` w logach `logs/bajtoparser_20261013_001635.log` (okno) oraz
+`logs/bajtoparser_20261013_002240.log` (headless).
+
+| Miara | Surowy HTML | DOM | Różnica |
+|---|---|---|---|
+| Podstrony listy (liczba) | 6 pobranych | 6 przetworzonych | 0 |
+| Wystąpienia klasy `wiersz-produktu` (tabela) | 0 | 180 | 180 |
+| Wystąpienia klasy `produkt` (karty) | 0 | 252 | 252 |
+| Wystąpienia `data-id` | 0 | brak osobnego pomiaru w DOM | n/d |
+| Pozycje na liście razem | 0 | 432 | 432 |
+| Pozycje po deduplikacji | 0 | 420 (usunięto 12) | 420 |
+| Rekordy w CSV | 0 | 420 | 420 |
+| Strony produktów z nazwą i id w treści (z 10) | 0 | 10 z 10 (13/13 pól, faza 5) | 10 |
+| `<script>` na stronie listy / produktu | 2 / 2 | n/d | n/d |
+| Rozmiar strony listy / produktu (B) | 3952 / 2770 | n/d | n/d |
+
+Uwagi do odczytu: w DOM „tabela” i „karty” to liczba pozycji z pola `zrodlo` listy (przed
+deduplikacją), a nie licznik elementów DOM. Rozmiar 3952 B jest identyczny dla wszystkich 6
+podstron, a 2770 B dla wszystkich 10 stron produktów: to ta sama statyczna powłoka. W surowym
+HTML produktu identyfikator występuje tylko w `<meta name="produkt">` i w `<noscript>`
+(`id_w_html=false`, `id_gdziekolwiek=true` w 10/10); nazwy nie ma w żadnym (`nazwa_w_html=false`).
+
+**Wniosek:** w surowym HTML jest 0 rekordów na wszystkich 6 podstronach (0 `wiersz-produktu`,
+0 `produkt`, 0 `data-id`), a w DOM po skryptach 432 pozycje (180 w tabeli + 252 w kartach),
+czyli 420 unikalnych po usunięciu 12 duplikatów i tyle samo w CSV. Serwis jest więc statyczną
+powłoką, a całość danych dostarcza JavaScript, więc `urllib` bez przeglądarki daje zero rekordów
+i do ich zebrania potrzebny jest Selenium (albo bezpośrednie wczytanie plików JSON, o którym
+mowa w rozszerzeniu opcjonalnym).
+
+### Tabela B: okno vs headless (pełny przebieg, 420 rekordów)
+Źródło: linie `PODSUMOWANIE:` i `PRZEBIEG:` z logów wymienionych wyżej.
+
+| Miara | okno | headless | Stosunek (headless/okno) |
+|---|---|---|---|
+| Tryb | okno | headless | |
+| Czas całkowity (s) | 351,59 (05:52) | 410,30 (06:50) | 1,17 |
+| Rekordów w eksporcie | 420 | 420 | 1,00 |
+| Błędy / retry | 0 / 0 | 0 / 0 | |
+| s na rekord | 0,84 | 0,98 | 1,17 |
+| Pozycje na liście / po dedup. | 432 / 420 | 432 / 420 | |
+| Nierozpoznane wartości | 0 | 0 | |
+
+**Wniosek:** oba przebiegi dały ten sam wynik (420 rekordów, 0 błędów, 0 retry, pliki
+`okno.csv` i `headless.csv` są bajt w bajt identyczne), więc tryb nie wpływa na poprawność.
+Headless był wolniejszy o 58,71 s (ok. 17%), czyli odwrotnie, niż zwykle się zakłada. To
+pojedyncza para przebiegów bez powtórzeń, więc różnica może wynikać z wahań (czas zdominowany
+przez pauzy 0,5 s i losowe opóźnienia porcji 0,3-2 s serwisu), a nie z trybu: bez kilku
+powtórzeń nie wolno z niej wnioskować o przewadze okna.
+
+Polecenia: `python main.py --wyjscie okno --porownanie` oraz
+`python main.py --headless --wyjscie headless --porownanie`. Do wykonania na początku/końcu fazy:
+próba kodu wyjścia 2 przy zatrzymanym serwerze na porcie 8000 (z notatki fazy 6).
