@@ -65,3 +65,19 @@ jest per porcja (`@ponawiaj` na `wczytaj_porcje`, pętla bez dekoratora). Liczb�
 danych), `producent` `—` 17 / 14, `ocena` `—` 16 / 12. Odchylenie od README: `gwarancja` też
 bywa `—` (6 na każdej z tych podstron); `czysc_gwarancje("—")` daje `None`, więc to nie wymaga zmian.
 
+## Faza 5: ProductPage
+**Atrybuty dostępne dopiero po interakcji (utrudnienie 5.0):** na 20 produktach z podstrony 1
+panele *Specyfikacja* i *Dostawa i zwroty* mają przed kliknięciem 0 wypełnionych pól (20/20
+produktów), a po kliknięciu zakładki i `data-wypelnione="tak"` odpowiednio 7 i 5 (20/20). Czyli
+12 z 13 atrybutów szczegółów nie istnieje w DOM bez kliknięcia; 13. (opis) jest widoczny od razu.
+**Decyzje:** zakładki otwierane osobno z własnym `@ponawiaj` (nie zagnieżdżone), pola czytane
+jednym `execute_script` po otwarciu obu paneli (atomowa migawka, selektory z Pythona, `textContent`
+zamiast `.text`, bo ukryty panel zwraca `''`). Strona produktu niczego nie połyka: nieistniejący
+produkt (404 bez `data-stan-renderu`) kończy się `TimeoutException` po 4 próbach, diagnostyką
+i wyjątkiem dla pipeline'u. Nagłówek `#karta-produktu` nie wnosi nowych atrybutów: to duplikaty
+8 pól z listy plus nazwa i identyfikator, więc rekord ma 13 kluczy szczegółów.
+**Liczby (20 produktów, co 3. rekord podstrony 1, headless):** 20/20 udanych, 0 retry,
+średnio 0,66 s na produkt (otwarcie, 2 zakładki, odczyt; w tym pauza grzecznościowa 0,5 s),
+13/13 pól niepustych w każdym z 20 produktów (na tej próbce brak `—` w polach szczegółów),
+nazwa i kategoria z nagłówka zgodne z listą w 5/5 produktów.
+

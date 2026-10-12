@@ -74,8 +74,12 @@ kontraktem, a klasy tak.
 - Opis: `#panel-opis` (tekst).
 - Uwaga: odczyt `.text` z elementu w ukrytym panelu zwraca `''`. Pola czytać dopiero
   po otwarciu danej zakładki, a tekst brać z panelu widocznego (ewentualnie `textContent`).
-- Nagłówek `#karta-produktu` powtarza dane z listy (cena, kategoria, producent, ocena...);
-  klasy pól w nagłówku **do potwierdzenia w fazie 5** (w rekonesansie sprawdzono tylko tekst).
+- Nagłówek `#karta-produktu` **[DOM, faza 5]**: `h1#nazwa-produktu`, `p#identyfikator`
+  („Symbol oferty: <id>”) i `dl.dane-podstawowe` z `dd.cena[data-waluta]`, `.kategoria`,
+  `.producent`, `.dostepnosc`, `.ocena`, `.liczba-opinii`, `.data-dodania`, `.gwarancja`.
+  Wszystkie to duplikaty pól z listy (te same klasy), bez nowych atrybutów, więc rekord
+  szczegółów zostaje przy 13 kluczach. Nagłówek służy tylko do kontroli spójności
+  (nazwa, kategoria) lista↔produkt.
 
 ## 6. Braki danych
 - `—` z klasą `brak-wartosci` **[DOM]**:
@@ -106,4 +110,3 @@ więc bez przeglądarki lub bez użycia plików JSON nie da się ich pobrać.
   USD 4 [DOM], co daje 72.
 - Braki: 71 `producent`, 84 `ocena` w całości.
 - Opóźnienie porcji 300-2000 ms (niemierzone).
-- Klasy pól w nagłówku `#karta-produktu` (patrz sekcja 5).
