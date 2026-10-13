@@ -214,3 +214,19 @@ log10(ceny) (mediany od 129 zł, Kuchnia, do 924,50 zł, RTV: 7,2×). Korelacje 
 0,49 (po usunięciu efektu kategorii 0,42, umiarkowana, istotna), cena-ocena -0,08, liczba
 opinii-ocena 0,03, cena-stan -0,03, cena-liczba opinii -0,06 (pomijalne: dane losowe). Decyzja:
 Spearman liczony jako Pearson rang, bo pandas 3 wymaga `scipy` (brak zgody na nową zależność).
+
+## Faza 9: audyt wymagań (stan na 2026-10-13)
+**Próba kodu wyjścia 2 przy niedostępnym serwerze (wykonana ręcznie przez autora):**
+`python main.py --strony 1 --limit 1 --headless` przy zatrzymanym serwerze na porcie 8000 wypisał
+komunikat „Serwis nie odpowiada pod adresem http://localhost:8000/ ...” i zakończył się kodem
+wyjścia 2, bez uruchamiania Chrome'a (sprawdzenie `serwis_odpowiada` jednym żądaniem `urllib`
+poprzedza `otworz_driver` w `cli.main`). Domyka to zapowiedź z faz 6 i 7; wcześniej zachowanie
+było pokryte tylko testem jednostkowym (`tests/test_cli.py`).
+**Progi z PDF-a laboratorium (`docs/LAB1.pdf`):** dla roli PARSER obowiązuje min. 200 rekordów
+i 18 atrybutów (4.0); 400 rekordów i 22 atrybuty to wymagania dla AUTORA (5.0). Dane (420
+rekordów, 26 atrybutów serwisu, 30 kolumn) spełniają oba progi. Szczegóły: `docs/AUDYT.md`.
+**Decyzje:** `matplotlib` dopisany do stosu w `CLAUDE.md` (PDF zaleca „pandas + matplotlib”
+do analizy); rozszerzenie opcjonalne „źródło JSON w `dane/`” pominięte; Spearman jako Pearson
+rang, duplikaty tylko w logu i porównanie okno/headless z jednego przebiegu zostają w
+sprawozdaniu jako ograniczenia, bez zmian w kodzie; kolejność wymiarów czeka na sprawdzenie
+z kluczem odpowiedzi.

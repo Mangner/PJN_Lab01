@@ -6,8 +6,8 @@ jest przeglądarka (Selenium + Chrome). Serwis (`../Web-App/`) jest cudzy: nie e
 i nie czytamy `../Web-App/klucz/` (klucz odpowiedzi, którego używam dopiero do weryfikacji).
 
 ## Stos
-Python 3.13, Selenium (Chrome, sterownik pobiera Selenium Manager), pandas, argparse,
-pytest, ruff. Brak innych zależności bez mojej zgody.
+Python 3.13, Selenium (Chrome, sterownik pobiera Selenium Manager), pandas, matplotlib
+(wykresy w `analiza/`), argparse, pytest, ruff. Brak innych zależności bez mojej zgody.
 
 ## Komendy
 ```powershell
