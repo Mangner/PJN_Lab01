@@ -182,3 +182,35 @@ powtórzeń nie wolno z niej wnioskować o przewadze okna.
 Polecenia: `python main.py --wyjscie okno --porownanie` oraz
 `python main.py --headless --wyjscie headless --porownanie`. Do wykonania na początku/końcu fazy:
 próba kodu wyjścia 2 przy zatrzymanym serwerze na porcie 8000 (z notatki fazy 6).
+
+## Faza 8: analiza danych (kontrola jakości, statystyki, wykresy)
+**Pliki:** `analiza/kontrola_jakosci.py` -> `analiza/wyniki/kontrola_jakosci.md`,
+`analiza/statystyki.py` -> `analiza/wyniki/statystyki.md` + 4 wykresy PNG (dpi 150) w
+`analiza/wykresy/`. Skrypty są poza pakietem, odtwarzalne jedną komendą i nie importują
+`parsing/`: kontrola parsera to niezależny odczyt surowych napisów z `okno_surowe.jsonl`
+(wyrażenia regularne) porównany z `okno.csv`.
+**Kontrola jakości (420 rekordów, 30 kolumn):** 7980 porównań surowe vs oczyszczone, 0 niezgodnych;
+braki w CSV równe `—` w surowych danych: producent 71 (16,9%), ocena 84 (20,0%), gwarancja 21
+(5,0%), waga 25 (6,0%); `cena_poprzednia` 329 (78,3%) to brak promocji. Liczby README
+(432/420/12, waluty 357/38/25, braki 71 i 84) zgodne; README nie podaje braków gwarancji i wagi.
+Duplikaty: 432 -> 420 (12), 0 różnych od oryginału (z logu pipeline'u; szczegóły identyczne z
+założenia: to samo `id` i URL). `okno.csv` i `headless.csv` identyczne (CSV, JSON, JSONL: te same
+SHA-256). Typy: wszystkie kolumny liczbowe liczbowe, 0 tekstu w nich, 0 naruszeń kontroli
+spójności (EAN 13 cyfr, ocena 0-5, URL = `/produkt/<id>.html`, daty ISO).
+**Odstające:** cena PLN 37 wg IQR (7 wg z-score, max 24 999 zł, AGD), EUR 2/1, USD 3/1, waga 47/11,
+wymiary 17/45/35, liczba opinii 38/1 (jedna wartość 12 480, 26,1× większa od następnej, 479),
+stan magazynowy 0. Wszystkie zgodne z surowym tekstem: anomalie danych serwisu, nie błędy parsera.
+**Naiwny `replace(",", ".")` na surowych cenach:** poprawny dla 357/357 PLN i 38/38 EUR; dla USD
+23/25 poprawnych, 2 rekordy z separatorem tysięcy (`$1,471.99`, `$1,769.99`) dają `ValueError`
+(`1.471.99`), czyli NIE błąd 100×. Zawyżenie 100× daje dopiero wariant „usuń przecinki” na PLN i
+EUR (`139,00 zł` -> 13900). Do sprawozdania opisać dokładnie tak.
+**Wniosek o parserze:** nie znaleziono błędu, brak zmian w `parsing/` (więc brak testu
+regresyjnego). Do potwierdzenia kluczem: kolejność liczb w `wymiary` jest w serwisie
+niepodpisana, a rozkłady (lampy stojące 42 x 191 x 47, telefony 7 x 14 x 1) sugerują, że
+nazwy `dlugosc/szerokosc/wysokosc` mogą nie odpowiadać znaczeniu; wartości przepisane poprawnie.
+**Statystyki:** cena PLN (n=357): średnia 931,72, mediana 309, Q1 149, Q3 849, skośność 6,73; EUR
+(38) i USD (25) tylko w tabeli, bez przeliczania kursem. Kategoria wyjaśnia 23,5% wariancji
+log10(ceny) (mediany od 129 zł, Kuchnia, do 924,50 zł, RTV: 7,2×). Korelacje (Spearman): cena-waga
+0,49 (po usunięciu efektu kategorii 0,42, umiarkowana, istotna), cena-ocena -0,08, liczba
+opinii-ocena 0,03, cena-stan -0,03, cena-liczba opinii -0,06 (pomijalne: dane losowe). Decyzja:
+Spearman liczony jako Pearson rang, bo pandas 3 wymaga `scipy` (brak zgody na nową zależność).
