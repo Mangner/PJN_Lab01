@@ -250,3 +250,10 @@ Stan końcowy: 240 testów zielonych, ruff czysty, 420 rekordów, 30 kolumn, 0 b
 powtórzonych przebiegach (okno 362,46 s, headless 347,47 s). Jedyna zmiana w `parsing/` w tej fazie to
 nazwy kolumn wymiarów (szerokość, wysokość, głębokość); pozostałe zastrzeżenia (Spearman jako Pearson
 rang, duplikaty tylko w logu, dwie pary przebiegów) zostają opisane w sprawozdaniu.
+
+## Faza 9: eksport PDF (2026-10-18)
+Opis serwisu (`docs/OPIS_SERWISU.md`) napisano wyłącznie na podstawie README autora serwisu, a PDF buduje
+`sprawozdanie/buduj_pdf.py` (Markdown → HTML → `driver.print_page`, Chrome headless). Do stosu doszła jedna
+zależność, `markdown`. Wynik: `sprawozdanie/LAB1_sprawozdanie.pdf`, 11 stron A4 (strona tytułowa, opis
+serwisu, sekcje 1-6, 4 wykresy); 240 testów zielonych, ruff czysty. Z listy zbiorczej zostaje tylko
+archiwum ZIP.

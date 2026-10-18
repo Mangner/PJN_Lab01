@@ -7,7 +7,7 @@ i nie czytamy `../Web-App/klucz/` (klucz odpowiedzi, którego używam dopiero do
 
 ## Stos
 Python 3.13, Selenium (Chrome, sterownik pobiera Selenium Manager), pandas, matplotlib
-(wykresy w `analiza/`), argparse, pytest, ruff. Brak innych zależności bez mojej zgody.
+(wykresy w `analiza/`), markdown (tylko `sprawozdanie/buduj_pdf.py`), argparse, pytest, ruff. Brak innych zależności bez mojej zgody.
 
 ## Komendy
 ```powershell
