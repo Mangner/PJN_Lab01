@@ -10,4 +10,4 @@ Stan: odhaczaj po każdej fazie i rób commit. Każda faza to osobna sesja.
 - [x] 6. Pipeline, CLI, eksport CSV + JSON
 - [x] 7. Pełne przebiegi (okno i headless) + porównanie surowy HTML vs DOM
 - [x] 8. Analiza jakości danych, poprawki parsera, statystyki i wykresy
-- [ ] 9. Sprawozdanie PDF, audyt wymagań, archiwum ZIP
+- [x] 9. Sprawozdanie PDF, audyt wymagań, archiwum ZIP

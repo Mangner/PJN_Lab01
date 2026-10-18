@@ -242,3 +242,11 @@ identyczne między trybami. Headless szybszy o 14,99 s (ok. 4%), czyli kierunek 
 z 13.10 (351,59 s i 410,30 s). Dwie pary o przeciwnych znakach różnicy: czas to szum pauz i
 opóźnień serwisu, bez wniosku o przewadze trybu. Analiza (`kontrola_jakosci.py`, `statystyki.py`)
 przeliczona na nowych danych: liczby bez zmian, zmieniły się tylko nazwy logu źródłowego i hasze.
+
+## Faza 9: zamknięcie (2026-10-18)
+Faza zamknięta po audycie wymagań, poprawce nazw wymiarów i uzupełnieniu szkicu sprawozdania; zostały
+czynności organizacyjne poza repozytorium: opis serwisu od partnera, eksport do PDF i archiwum ZIP.
+Stan końcowy: 240 testów zielonych, ruff czysty, 420 rekordów, 30 kolumn, 0 błędów i 0 retry w obu
+powtórzonych przebiegach (okno 362,46 s, headless 347,47 s). Jedyna zmiana w `parsing/` w tej fazie to
+nazwy kolumn wymiarów (szerokość, wysokość, głębokość); pozostałe zastrzeżenia (Spearman jako Pearson
+rang, duplikaty tylko w logu, dwie pary przebiegów) zostają opisane w sprawozdaniu.
