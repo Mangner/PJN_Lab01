@@ -96,8 +96,8 @@ wyszła `None`, jest liczona i logowana (jeden WARNING na rekord z listą pól).
 parsera (nieznany format) nie udaje braku danych. Zapis w locie: każdy rekord (surowy + szczegóły)
 trafia od razu do `<wyjscie>_surowe.jsonl`; CSV i JSON zapisują się na końcu, także po Ctrl+C.
 **Format wyjścia:** 30 kolumn w stałej kolejności (`parsing/rekord.py: KOLUMNY`): 26 atrybutów
-serwisu, z czego cena rozbita na `cena` + `waluta`, wymiary na `dlugosc_cm`/`szerokosc_cm`/
-`wysokosc_cm`, koszt dostawy na `koszt_dostawy` + `waluta_dostawy` (gratis = 0.0 PLN), plus
+serwisu, z czego cena rozbita na `cena` + `waluta`, wymiary na `szerokosc_cm`/`wysokosc_cm`/
+`glebokosc_cm` (nazwy poprawione w fazie 9, wcześniej `dlugosc/szerokosc/wysokosc`), koszt dostawy na `koszt_dostawy` + `waluta_dostawy` (gratis = 0.0 PLN), plus
 `zrodlo` (tabela/karta). Liczby całkowite jako `Int64` (bez 25 -> 25.0), `ean` jako tekst.
 **Liczby (headless):** `--strony 1 --limit 5`: 5 rekordów, 30 kolumn, 0 błędów, 14,19 s.
 `--strony 2`: 144 pozycje na liście -> 143 po deduplikacji (1 duplikat, 0 różnych od oryginału),
@@ -205,9 +205,10 @@ stan magazynowy 0. Wszystkie zgodne z surowym tekstem: anomalie danych serwisu, 
 (`1.471.99`), czyli NIE błąd 100×. Zawyżenie 100× daje dopiero wariant „usuń przecinki” na PLN i
 EUR (`139,00 zł` -> 13900). Do sprawozdania opisać dokładnie tak.
 **Wniosek o parserze:** nie znaleziono błędu, brak zmian w `parsing/` (więc brak testu
-regresyjnego). Do potwierdzenia kluczem: kolejność liczb w `wymiary` jest w serwisie
-niepodpisana, a rozkłady (lampy stojące 42 x 191 x 47, telefony 7 x 14 x 1) sugerują, że
-nazwy `dlugosc/szerokosc/wysokosc` mogą nie odpowiadać znaczeniu; wartości przepisane poprawnie.
+regresyjnego). Kolejność liczb w `wymiary` jest w serwisie niepodpisana, a rozkłady (lampy
+stojące 36 x 191 x 47, telefony 7 x 14 x 1) sugerowały, że nazwy `dlugosc/szerokosc/wysokosc`
+nie odpowiadają znaczeniu; w fazie 9 potwierdził to generator serwisu (szerokość, wysokość,
+głębokość), patrz „Faza 9”. Wartości były przepisane poprawnie.
 **Statystyki:** cena PLN (n=357): średnia 931,72, mediana 309, Q1 149, Q3 849, skośność 6,73; EUR
 (38) i USD (25) tylko w tabeli, bez przeliczania kursem. Kategoria wyjaśnia 23,5% wariancji
 log10(ceny) (mediany od 129 zł, Kuchnia, do 924,50 zł, RTV: 7,2×). Korelacje (Spearman): cena-waga
@@ -228,5 +229,16 @@ rekordów, 26 atrybutów serwisu, 30 kolumn) spełniają oba progi. Szczegóły:
 **Decyzje:** `matplotlib` dopisany do stosu w `CLAUDE.md` (PDF zaleca „pandas + matplotlib”
 do analizy); rozszerzenie opcjonalne „źródło JSON w `dane/`” pominięte; Spearman jako Pearson
 rang, duplikaty tylko w logu i porównanie okno/headless z jednego przebiegu zostają w
-sprawozdaniu jako ograniczenia, bez zmian w kodzie; kolejność wymiarów czeka na sprawdzenie
-z kluczem odpowiedzi.
+sprawozdaniu jako ograniczenia, bez zmian w kodzie.
+**Poprawka nazw wymiarów (2026-10-18):** liczby w `A x B x C cm` to kolejno szerokość,
+wysokość, głębokość (generator serwisu, ustalenie autora). Kolumny `dlugosc_cm`,
+`szerokosc_cm`, `wysokosc_cm` przemianowano na `szerokosc_cm`, `wysokosc_cm`, `glebokosc_cm`
+(1., 2., 3. liczba); wartości bez zmian. Uwaga: `szerokosc_cm` istnieje w obu wersjach z innym
+znaczeniem. Pliki w `output/` i dane w `analiza/` odczytujące je mają jeszcze stare nazwy do
+czasu ponownego przebiegu.
+**Powtórzone przebiegi (2026-10-18), po poprawce nazw wymiarów:** okno 362,46 s (0,86 s/rekord),
+headless 347,47 s (0,83 s/rekord), obie wersje 420 rekordów, 0 błędów, 0 retry, 432 → 420, CSV/JSON
+identyczne między trybami. Headless szybszy o 14,99 s (ok. 4%), czyli kierunek odwrotny niż w parze
+z 13.10 (351,59 s i 410,30 s). Dwie pary o przeciwnych znakach różnicy: czas to szum pauz i
+opóźnień serwisu, bez wniosku o przewadze trybu. Analiza (`kontrola_jakosci.py`, `statystyki.py`)
+przeliczona na nowych danych: liczby bez zmian, zmieniły się tylko nazwy logu źródłowego i hasze.

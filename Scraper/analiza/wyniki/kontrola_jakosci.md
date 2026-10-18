@@ -1,7 +1,7 @@
 # Kontrola jakości danych
 
 Źródła: `output/okno.csv`, `output/okno_surowe.jsonl`, `output/headless.csv`,
-`logs/bajtoparser_20261013_001635.log`. Raport generuje `python analiza/kontrola_jakosci.py`.
+`logs/bajtoparser_20261018_165547.log`. Raport generuje `python analiza/kontrola_jakosci.py`.
 
 ## 1. Liczba rekordów i braki
 
@@ -31,7 +31,7 @@ Pozostałe 25 kolumn nie ma braków (pełna lista kolumn w tabeli typów poniże
 | Powtórzone `id` w `okno.csv` | 0 |
 | Powtórzone `url` w `okno.csv` | 0 |
 
-Źródło liczb z logu: `logs/bajtoparser_20261013_001635.log` (linia `PODSUMOWANIE:`).
+Źródło liczb z logu: `logs/bajtoparser_20261018_165547.log` (linia `PODSUMOWANIE:`).
 
 **Porównanie usuniętych duplikatów z oryginałem.** Pipeline porównał pola listy (po oczyszczeniu) każdego duplikatu z pierwszym wystąpieniem tego samego `id` jeszcze przed usunięciem: różnych było **0** z 12. Szczegóły (zakładki Specyfikacja i Dostawa) duplikatu są identyczne z założenia: duplikat ma to samo `id` i ten sam URL, więc prowadzi do tej samej strony produktu `produkt/<id>.html`, a jej treść nie zależy od tego, z której podstrony listy weszliśmy. Dlatego pipeline deduplikuje przed wejściem w szczegóły (duplikaty nie generują żądań). Ograniczenie: usunięte duplikaty nie są zapisane w żadnym pliku (`okno_surowe.jsonl` ma już tylko 420 linii), więc porównania nie da się powtórzyć z samych plików wyjściowych; opieramy się na liczbie z logu.
 
@@ -58,9 +58,9 @@ Pozostałe 25 kolumn nie ma braków (pełna lista kolumn w tabeli typów poniże
 | kolor | str | tekst | tak |
 | material | str | tekst | tak |
 | waga_kg | float64 | liczbowy | tak |
-| dlugosc_cm | float64 | liczbowy | tak |
 | szerokosc_cm | float64 | liczbowy | tak |
 | wysokosc_cm | float64 | liczbowy | tak |
+| glebokosc_cm | float64 | liczbowy | tak |
 | kraj_pochodzenia | str | tekst | tak |
 | sprzedawca | str | tekst | tak |
 | stan_magazynowy_szt | int64 | liczbowy | tak |
@@ -92,9 +92,9 @@ Metody: IQR (wartość poza [Q1 − 1,5·IQR; Q3 + 1,5·IQR]) oraz |z-score| > 3
 | cena EUR | 38 | 60.99 | 23.49 | 235.24 | -294.13 | 552.87 | 2 | 1 | 786.99 |
 | cena USD | 25 | 83.99 | 45.99 | 165.99 | -134.01 | 345.99 | 3 | 1 | 1769.99 |
 | waga_kg | 395 | 1.46 | 0.36 | 3.15 | -3.81 | 7.33 | 47 | 11 | 38.5 |
-| dlugosc_cm | 420 | 28 | 14 | 41 | -26.5 | 81.5 | 17 | 7 | 116 |
-| szerokosc_cm | 420 | 21 | 8 | 37 | -35.5 | 80.5 | 45 | 9 | 191 |
-| wysokosc_cm | 420 | 15 | 7 | 27.25 | -23.38 | 57.62 | 35 | 24 | 203 |
+| szerokosc_cm | 420 | 28 | 14 | 41 | -26.5 | 81.5 | 17 | 7 | 116 |
+| wysokosc_cm | 420 | 21 | 8 | 37 | -35.5 | 80.5 | 45 | 9 | 191 |
+| glebokosc_cm | 420 | 15 | 7 | 27.25 | -23.38 | 57.62 | 35 | 24 | 203 |
 | liczba_opinii | 420 | 14 | 3 | 31 | -39 | 73 | 38 | 1 | 12480 |
 | stan_magazynowy_szt | 420 | 52.5 | 2 | 144.5 | -211.75 | 358.25 | 0 | 0 | 250 |
 
@@ -149,7 +149,7 @@ Odstających wg IQR: 47 (górnych: 47, dolnych: 0), wg z-score: 11. Największa 
 
 **Interpretacja.** Ciężkie towary (dom i ogród, RTV, sport, AGD). Surowy napis (`38,5 kg`) daje tę samą liczbę; przecinek dziesiętny nie został wzięty za separator tysięcy (385 kg byłoby wartością absurdalną). **Anomalia danych (towary ciężkie), nie błąd parsera**.
 
-### dlugosc_cm
+### szerokosc_cm
 
 Odstających wg IQR: 17 (górnych: 17, dolnych: 0), wg z-score: 7. Największa wartość: 116 (4.1× mediany). Kategorie odstających górnych: RTV i audio (17).
 
@@ -161,9 +161,9 @@ Odstających wg IQR: 17 (górnych: 17, dolnych: 0), wg z-score: 7. Największa w
 | P56456 | RTV i audio | 104 | 104 x 8 x 10 cm |
 | P58422 | RTV i audio | 104 | 104 x 61 x 9 cm |
 
-**Interpretacja.** Duże i długie towary (telewizory i soundbary, lampy stojące, sprzęt sportowy). Wartości zgodne z surowym tekstem `a x b x c cm`, więc to **nie błąd przepisania**; wątpliwość dotyczy tylko tego, czy pozycja liczby w tekście odpowiada nazwie osi (patrz wniosek).
+**Interpretacja.** Duże i długie towary (telewizory i soundbary, lampy stojące, sprzęt sportowy). Wartości zgodne z surowym tekstem `a x b x c cm`, więc to **nie błąd przepisania**; pozycja liczby w tekście odpowiada nazwie osi (szerokość × wysokość × głębokość, patrz wniosek).
 
-### szerokosc_cm
+### wysokosc_cm
 
 Odstających wg IQR: 45 (górnych: 45, dolnych: 0), wg z-score: 9. Największa wartość: 191 (9.1× mediany). Kategorie odstających górnych: Dom i ogród (23), AGD (11), Sport i turystyka (11).
 
@@ -175,9 +175,9 @@ Odstających wg IQR: 45 (górnych: 45, dolnych: 0), wg z-score: 9. Największa w
 | P85096 | Dom i ogród | 174 | 47 x 174 x 40 cm |
 | P86097 | Dom i ogród | 171 | 42 x 171 x 40 cm |
 
-**Interpretacja.** Duże i długie towary (telewizory i soundbary, lampy stojące, sprzęt sportowy). Wartości zgodne z surowym tekstem `a x b x c cm`, więc to **nie błąd przepisania**; wątpliwość dotyczy tylko tego, czy pozycja liczby w tekście odpowiada nazwie osi (patrz wniosek).
+**Interpretacja.** Duże i długie towary (telewizory i soundbary, lampy stojące, sprzęt sportowy). Wartości zgodne z surowym tekstem `a x b x c cm`, więc to **nie błąd przepisania**; pozycja liczby w tekście odpowiada nazwie osi (szerokość × wysokość × głębokość, patrz wniosek).
 
-### wysokosc_cm
+### glebokosc_cm
 
 Odstających wg IQR: 35 (górnych: 35, dolnych: 0), wg z-score: 24. Największa wartość: 203 (13.5× mediany). Kategorie odstających górnych: Sport i turystyka (20), Dom i ogród (14), Kuchnia (1).
 
@@ -189,7 +189,7 @@ Odstających wg IQR: 35 (górnych: 35, dolnych: 0), wg z-score: 24. Największa 
 | P32852 | Sport i turystyka | 192 | 55 x 1 x 192 cm |
 | P29052 | Sport i turystyka | 190 | 69 x 1 x 190 cm |
 
-**Interpretacja.** Duże i długie towary (telewizory i soundbary, lampy stojące, sprzęt sportowy). Wartości zgodne z surowym tekstem `a x b x c cm`, więc to **nie błąd przepisania**; wątpliwość dotyczy tylko tego, czy pozycja liczby w tekście odpowiada nazwie osi (patrz wniosek).
+**Interpretacja.** Duże i długie towary (telewizory i soundbary, lampy stojące, sprzęt sportowy). Wartości zgodne z surowym tekstem `a x b x c cm`, więc to **nie błąd przepisania**; pozycja liczby w tekście odpowiada nazwie osi (szerokość × wysokość × głębokość, patrz wniosek).
 
 ### liczba_opinii
 
@@ -226,9 +226,9 @@ Odczyt prostym wyrażeniem regularnym, bez kodu z `parsing/`, porównany z CSV d
 | czas_dostawy_dni | 420 | 0 |
 | zwrot_dni | 420 | 0 |
 | koszt_dostawy | 420 | 0 |
-| dlugosc_cm | 420 | 0 |
 | szerokosc_cm | 420 | 0 |
 | wysokosc_cm | 420 | 0 |
+| glebokosc_cm | 420 | 0 |
 | data_dodania | 420 | 0 |
 | waluta | 420 | 0 |
 | producent | 420 | 0 |
@@ -282,8 +282,8 @@ Przykłady wariantu z usunięciem przecinków (cena zawyżona 100×; `\xa0` w na
 
 | plik | SHA-256 okno | SHA-256 headless | identyczne |
 |---|---|---|---|
-| CSV | 1a1ec910d87a69e9 | 1a1ec910d87a69e9 | True |
-| JSON | c5ea19f4b011c384 | c5ea19f4b011c384 | True |
+| CSV | 5ef3dabcf0e1bd0b | 5ef3dabcf0e1bd0b | True |
+| JSON | e531f4bcdca55b87 | e531f4bcdca55b87 | True |
 | JSONL (surowe) | 0d6a667d764d9e48 | 0d6a667d764d9e48 | True |
 
 `DataFrame.equals` na `okno.csv` i `headless.csv`: **True** (420 × 30 vs 420 × 30). Hashe skrócone do 16 znaków.
@@ -299,4 +299,4 @@ Przykłady wariantu z usunięciem przecinków (cena zawyżona 100×; `\xa0` w na
 
 **Wniosek: nie znaleziono błędu parsera, więc nie wprowadzono zmian w `parsing/`.** Wartości odstające mają odpowiedniki w surowych napisach (odczyt niezależny dał te same liczby), więc są cechą danych serwisu, a nie artefaktem czyszczenia.
 
-**Do weryfikacji z kluczem odpowiedzi (nie rozstrzygalne z samych danych):** kolejność liczb w `wymiary` (`17 x 9 x 8 cm`) jest w serwisie niepodpisana; parser przypisuje ją jako długość × szerokość × wysokość. Rozkłady (np. lampy stojące o „szerokości” rzędu 160–190 cm, telefony 7 × 14 × 1 cm) sugerują, że nazwy kolumn `dlugosc_cm`/`szerokosc_cm`/`wysokosc_cm` mogą nie odpowiadać znaczeniu tych liczb. Wartości są poprawnie przepisane, wątpliwe jest tylko nazewnictwo. Nie zmieniano go bez potwierdzenia.
+**Poprawka nazw kolumn wymiarów (wynik analizy):** serwis nie podpisuje liczb w `wymiary` (`17 x 9 x 8 cm`), a pierwotnie przypisano je jako długość × szerokość × wysokość. Rozkłady (lampy stojące 36 × 191 × 47 cm, telefony 7 × 14 × 1 cm) wskazały, że kolejność jest inna; kod generatora serwisu potwierdził: szerokość × wysokość × głębokość. Kolumny nazwano `szerokosc_cm`/`wysokosc_cm`/`glebokosc_cm`. Wartości były przepisane poprawnie, zmieniły się tylko nazwy.

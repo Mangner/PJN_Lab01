@@ -35,9 +35,9 @@ rysujemy w skali logarytmicznej.
 | liczba opinii | 420 | 58.66 | 14 | 0 | 3 | 31 | 0 | 12480 | 609.65 |
 | gwarancja (mies.) | 399 | 24.6 | 24 | 24 | 24 | 24 | 12 | 60 | 10.68 |
 | waga (kg) | 395 | 3.35 | 1.46 | 0.06 | 0.36 | 3.15 | 0.02 | 38.5 | 5.41 |
-| wymiar 1 (cm) | 420 | 30.59 | 28 | 5 | 14 | 41 | 3 | 116 | 22.28 |
-| wymiar 2 (cm) | 420 | 31.19 | 21 | 2 | 8 | 37 | 1 | 191 | 35.03 |
-| wymiar 3 (cm) | 420 | 27.37 | 15 | 7 | 7 | 27.25 | 1 | 203 | 40.48 |
+| szerokość (cm) | 420 | 30.59 | 28 | 5 | 14 | 41 | 3 | 116 | 22.28 |
+| wysokość (cm) | 420 | 31.19 | 21 | 2 | 8 | 37 | 1 | 191 | 35.03 |
+| głębokość (cm) | 420 | 27.37 | 15 | 7 | 7 | 27.25 | 1 | 203 | 40.48 |
 | stan magazynowy (szt.) | 420 | 79.5 | 52.5 | 0 | 2 | 144.5 | 0 | 250 | 82.28 |
 | czas dostawy (dni) | 420 | 5.46 | 2.5 | 2 | 2 | 4 | 1 | 30 | 6.98 |
 | koszt dostawy | 420 | 13.58 | 9.99 | 0 | 0 | 14.99 | 0 | 149 | 18.99 |
@@ -46,8 +46,8 @@ rysujemy w skali logarytmicznej.
 Uwagi: `n` mniejsze niż 420 oznacza braki (ocena, gwarancja, waga). Moda cech ciągłych
 (waga, wymiary) bywa przypadkowa (przy remisach pokazano do trzech wartości), więc do opisu
 tych cech służą mediana i kwartyle.
-Kolumny wymiarów opisano „wymiar 1/2/3” w kolejności z tekstu serwisu, bo ich znaczenie
-(długość, szerokość, wysokość) jest do potwierdzenia, patrz `kontrola_jakosci.md`, sekcja 7.
+Kolumny wymiarów (szerokość, wysokość, głębokość) odpowiadają kolejności liczb w tekście
+serwisu; nazwy ustalono po analizie rozkładów, patrz `kontrola_jakosci.md`, sekcja 7.
 
 ## 4. Wykresy
 

@@ -52,12 +52,12 @@ def czysc_wage(surowa: str | None) -> float | None:
 
 
 def czysc_wymiary(surowa: str | None) -> tuple[float, float, float] | None:
-    """Wymiary `17 x 9 x 8 cm` -> (17.0, 9.0, 8.0) w centymetrach."""
+    """Wymiary `17 x 9 x 8 cm` -> (17.0, 9.0, 8.0): szerokość, wysokość, głębokość w cm."""
     grupy = _dopasuj(surowa, rf"{LICZBA}\s*x\s*{LICZBA}\s*x\s*{LICZBA}\s*cm")
     if not grupy:
         return None
-    dlugosc, szerokosc, wysokosc = (_float(g) for g in grupy)
-    return dlugosc, szerokosc, wysokosc
+    szerokosc, wysokosc, glebokosc = (_float(g) for g in grupy)
+    return szerokosc, wysokosc, glebokosc
 
 
 def czysc_stan_magazynowy(surowa: str | None) -> int | None:

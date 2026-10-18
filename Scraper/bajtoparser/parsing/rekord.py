@@ -45,9 +45,9 @@ KOLUMNY: list[str] = [
     "kolor",
     "material",
     "waga_kg",
-    "dlugosc_cm",
     "szerokosc_cm",
     "wysokosc_cm",
+    "glebokosc_cm",
     "kraj_pochodzenia",
     "sprzedawca",
     "stan_magazynowy_szt",
@@ -88,9 +88,9 @@ KOLUMNY_ZMIENNOPRZECINKOWE: frozenset[str] = frozenset(
         "cena_poprzednia",
         "ocena",
         "waga_kg",
-        "dlugosc_cm",
         "szerokosc_cm",
         "wysokosc_cm",
+        "glebokosc_cm",
         "koszt_dostawy",
     }
 )
@@ -157,7 +157,7 @@ def _czysc(surowy: dict[str, Any]) -> tuple[dict[str, Any], list[str]]:
 
     wymiary = czysc_wymiary(surowy.get("wymiary"))
     if wymiary is not None:
-        wynik["dlugosc_cm"], wynik["szerokosc_cm"], wynik["wysokosc_cm"] = wymiary
+        wynik["szerokosc_cm"], wynik["wysokosc_cm"], wynik["glebokosc_cm"] = wymiary
     sprawdz("wymiary", wymiary)
 
     koszt_surowy = normalizuj(surowy.get("koszt_dostawy"))

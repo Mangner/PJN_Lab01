@@ -18,10 +18,10 @@ Stan po przeczytaniu `docs/LAB1.pdf` i rozstrzygnięciach autora. Żaden obowią
 
 | # | Punkt | Status | Opis | Decyzja / co dalej |
 |---|---|---|---|---|
-| 3 | **Kolejność wymiarów `dlugosc_cm` / `szerokosc_cm` / `wysokosc_cm`** | **otwarte** | `czysc_wymiary` przypisuje liczby z tekstu `a x b x c cm` kolejno do długości, szerokości i wysokości (`parsing/pola.py:54`). Serwis nie podpisuje osi. Rozkłady (lampy 36 x 191 x 47, telefony 7 x 14 x 1) sugerują inne znaczenie. Wartości przepisane poprawnie (0 niezgodnych z surowym tekstem), wątpliwa jest tylko nazwa kolumn. | Autor sprawdzi z kluczem odpowiedzi (jutro, 2026-10-14). Do tego czasu w sprawozdaniu „wymiar 1/2/3” albo [DO UZUPEŁNIENIA]. Bez zmian w kodzie. |
+| 3 | **Kolejność wymiarów** (dawniej `dlugosc_cm` / `szerokosc_cm` / `wysokosc_cm`) | **rozstrzygnięte** | `czysc_wymiary` (`parsing/pola.py:54`) przypisywał liczby z tekstu `a x b x c cm` do długości, szerokości i wysokości. Rozkłady (lampy 36 x 191 x 47, telefony 7 x 14 x 1) wskazały inną kolejność, a kod generatora serwisu (`generuj_serwis.py`, linie 306 i 461, ustalone przez autora) potwierdził: szerokość, wysokość, głębokość. Wartości były przepisane poprawnie (0 niezgodnych z surowym tekstem). | Kolumny przemianowane na `szerokosc_cm` / `wysokosc_cm` / `glebokosc_cm` (`parsing/rekord.py`, `parsing/pola.py`, testy, skrypty i wyniki w `analiza/`, docs). **Pliki w `output/` mają jeszcze stare nazwy** (zob. uwaga w sprawozdaniu z poprawki). |
 | 4 | **Spearman jako Pearson rang** | zostaje, z zastrzeżeniem | `analiza/statystyki.py:193-194`: `a.rank().corr(b.rank())`, bo `scipy` nie jest w `requirements.txt`. Wynik poprawny (rangi uśrednione przy remisach), ale bez p-wartości; istotność to przybliżony próg \|r\| ≈ 1,96/√(n−1). | Decyzja: bez zmian w kodzie, zastrzeżenie w sprawozdaniu (sekcja 5). |
-| 5 | **Usunięte duplikaty nie są w żadnym pliku danych** | zostaje, z zastrzeżeniem | 12 duplikatów istnieje tylko jako liczba w logu (`logs/bajtoparser_20261013_001635.log`, „duplikatów=12 (różnych od oryginału: 0)”); `okno_surowe.jsonl` ma 420 linii. PDF wymaga tylko liczby duplikatów przed i po odrzuceniu, co jest spełnione (432 → 420). | Decyzja: bez zmian w kodzie, zastrzeżenie w sprawozdaniu (sekcja 4). |
-| 9 | **Okno vs headless: pojedyncza para przebiegów** | zostaje, z zastrzeżeniem | okno 351,59 s, headless 410,30 s (różnica 58,71 s, ok. 17%). Brak powtórzeń; czas zależy od losowego opóźnienia porcji serwisu (0,3-2 s) i pauz 0,5 s. | Decyzja: bez powtórzeń, zastrzeżenie w sprawozdaniu (sekcja 6.2). |
+| 5 | **Usunięte duplikaty nie są w żadnym pliku danych** | zostaje, z zastrzeżeniem | 12 duplikatów istnieje tylko jako liczba w logu (`logs/bajtoparser_20261018_165547.log`, „duplikatów=12 (różnych od oryginału: 0)”); `okno_surowe.jsonl` ma 420 linii. PDF wymaga tylko liczby duplikatów przed i po odrzuceniu, co jest spełnione (432 → 420). | Decyzja: bez zmian w kodzie, zastrzeżenie w sprawozdaniu (sekcja 4). |
+| 9 | **Okno vs headless: dwie pary przebiegów, różnice o przeciwnych znakach** | zostaje, z zastrzeżeniem | 2026-10-18: okno 362,46 s, headless 347,47 s (headless szybszy o 14,99 s, ok. 4%). 2026-10-13: okno 351,59 s, headless 410,30 s (headless wolniejszy o 58,71 s, ok. 17%). Czas zależy od losowego opóźnienia porcji serwisu (0,3-2 s) i pauz 0,5 s. | Decyzja: bez wniosku o przewadze trybu, zastrzeżenie w sprawozdaniu (sekcja 6.2). |
 | 7 | **Retry nie zadziałał w pełnych przebiegach** | informacja | Oba pełne przebiegi: `retry=0`, `błędów=0`. Zachowanie 1/2/4 s potwierdzają testy (`tests/test_retry.py`, `tests/test_timing.py`) i kontrolowana próba z fazy 3 (nieistniejący selektor: 4 próby, opóźnienia 1/2/4 s, 3 retry, jedna para plików diagnostycznych). W `diagnostyka/`: 4 pary `.png`+`.html` z 2026-10-11 (`BasePage_kliknij`). | Opisać w sprawozdaniu rzetelnie: retry zweryfikowany testami i jedną kontrolowaną próbą, nie błędem produkcyjnym. |
 | 8 | **`logs/`, `output/`, `diagnostyka/`, `scratch/` w `.gitignore`** | informacja | Dowody liczbowe nie są w repozytorium; trafią do ZIP-a tylko po ręcznym dołączeniu. | Przy pakowaniu dołączyć `output/`, `logs/`, `analiza/`, `docs/`. |
 
@@ -62,7 +62,7 @@ Stan po przeczytaniu `docs/LAB1.pdf` i rozstrzygnięciach autora. Żaden obowią
 | Opóźnienie ≥ 0,5 s | zrealizowany | `MIN_PAUZA_GRZECZNOSCIOWA_S = 0.5` (`utils/konfiguracja.py:7`); `timing.pauza_grzecznosciowa` wymusza `max(zadana, 0.5)`; `cli.zbuduj_konfiguracje` podnosi mniejszą wartość z ostrzeżeniem; w logu: `pauza_s=0.5`. |
 | Braki jako `None`/`NaN` | zrealizowany | `parsing/braki.py`; `okno.json`: 71 × `null` w `producent` (= 71 `—` w surowych); CSV: puste komórki, 0 znaków `—`. `nierozpoznane` = 0 w obu przebiegach. |
 | Eksport CSV (UTF-8) i JSON (`force_ascii=False`) jednocześnie | zrealizowany | `eksport.py: eksportuj` zapisuje oba pliki jednym wywołaniem. `okno.csv`: bez BOM, UTF-8, 5134 polskich znaków, 0 mojibake, 0 U+FFFD. |
-| Logowanie do pliku z podsumowaniem | zrealizowany | `utils/logowanie.py: skonfiguruj_logowanie`, `PodsumowaniePrzebiegu`; linia `PODSUMOWANIE:` ma tryb, stron, rekordów, błędów, retry, czas. Np. `logs/bajtoparser_20261013_001635.log`: stron=6, rekordów=420, błędów=0, retry=0, czas=351.59 s. |
+| Logowanie do pliku z podsumowaniem | zrealizowany | `utils/logowanie.py: skonfiguruj_logowanie`, `PodsumowaniePrzebiegu`; linia `PODSUMOWANIE:` ma tryb, stron, rekordów, błędów, retry, czas. Np. `logs/bajtoparser_20261018_165547.log`: stron=6, rekordów=420, błędów=0, retry=0, czas=362.46 s. |
 | Type hints i docstringi po polsku | zrealizowany | Przejrzane pliki z `pages/`, `utils/`, `parsing/`, `cli.py`, `pipeline.py`, `eksport.py`, `porownanie.py`; `ruff check` czysty. Nie sprawdzałem wyczerpująco każdej funkcji (próbka: czytane moduły). |
 | Nazwy po polsku konsekwentnie | częściowo | Dominuje polski (`ponawiaj`, `zapisz_diagnostyke`, `pobierz_rekordy`), ale zostają angielskie nazwy klas i modułów narzuconych przez POM (`BasePage`, `CatalogPage`, `ProductPage`, `pages/`, `pipeline.py`, `driver.py`, `retry.py`) oraz `Pipeline`. `CLAUDE.md` dopuszcza oba języki, o ile „konsekwentnie”; to mieszanka, ale spójna warstwowo. Ocena subiektywna. |
 
@@ -81,7 +81,7 @@ Stan po przeczytaniu `docs/LAB1.pdf` i rozstrzygnięciach autora. Żaden obowią
 |---|---|---|
 | ≥ 200 rekordów i ≥ 18 atrybutów | zrealizowany | 420 rekordów, 26 atrybutów serwisu (30 kolumn). Próg dla PARSERA to 18 atrybutów i 200 rekordów; 22 i 400 dotyczą AUTORA (sekcja 0.3, punkt 2). |
 | Wszystkie podstrony + szczegóły, połączenie danych | zrealizowany | Log: „Podstron w serwisie: 6, do przetworzenia: 6”, `ze szczegółami=420`, `pominięte podstrony=-`. `CatalogPage.liczba_podstron`, `ProductPage.pobierz_szczegoly`, `pipeline.Pipeline.uruchom`. |
-| Czyszczenie: liczby, formaty, duplikaty | zrealizowany | `parsing/ceny.py`, `daty.py`, `pola.py`, `duplikaty.py: deduplikuj` (po `id`, pierwsze wystąpienie). Log: 432 → 420 (usunięto 12). Daty ISO (0 naruszeń). Uwaga: nazewnictwo wymiarów to punkt 3 w sekcji 0.1, nie formaty. |
+| Czyszczenie: liczby, formaty, duplikaty | zrealizowany | `parsing/ceny.py`, `daty.py`, `pola.py`, `duplikaty.py: deduplikuj` (po `id`, pierwsze wystąpienie). Log: 432 → 420 (usunięto 12). Daty ISO (0 naruszeń). Nazwy kolumn wymiarów poprawione (punkt 3 w sekcji 0.1). |
 | Brak danych jako pusta wartość | zrealizowany | `producent` 71, `ocena` 84, `gwarancja_mies` 21, `waga_kg` 25 braków = `—` w surowych (zgodnie 1:1); `cena_poprzednia` 329 pustych = brak promocji. |
 | Opóźnienie ≥ 0,5 s | zrealizowany | Sekcja 1. |
 
@@ -101,7 +101,7 @@ Stan po przeczytaniu `docs/LAB1.pdf` i rozstrzygnięciach autora. Żaden obowią
 | (4.0) Eksport CSV + JSON jednocześnie | zrealizowany | `eksport.eksportuj`; `tests/test_eksport.py` (4); pliki `output/okno.{csv,json}`, `headless.{csv,json}`. |
 | (4.0) Logowanie z podsumowaniem | zrealizowany | Sekcja 1; `tests/test_logowanie.py` (6). |
 | (4.0) ≥ 3 testy funkcji czyszczących | zrealizowany | `tests/test_ceny.py` (7), `test_daty_braki.py` (6), `test_pola.py` (15), `test_duplikaty.py` (6), `test_rekord.py` (14): 48 testów czyszczenia; wszystkie 240 testów zielone, bez przeglądarki. |
-| (5.0) Headless z pomiarem czasu w obu trybach | zrealizowany | okno 351,59 s, headless 410,30 s (linie `PRZEBIEG:`, logi `…001635` i `…002240`); wyniki identyczne (SHA-256 CSV, JSON, JSONL). Zob. punkt 9 w sekcji 0.1. |
+| (5.0) Headless z pomiarem czasu w obu trybach | zrealizowany | okno 362,46 s, headless 347,47 s (linie `PRZEBIEG:`, logi `…20261018_165547` i `…20261018_171656`; wcześniejsza para z 13.10: 351,59 s i 410,30 s); wyniki identyczne (SHA-256 CSV, JSON, JSONL). Zob. punkt 9 w sekcji 0.1. |
 | (5.0) Zrzut `.png` + `.html` przy błędzie | zrealizowany | Sekcja 1; `diagnostyka/` (8 plików). |
 | Opcjonalne: źródło JSON w `dane/` | pominięte (decyzja) | Sekcja 0.3, punkt 11. |
 
@@ -112,7 +112,7 @@ Stan po przeczytaniu `docs/LAB1.pdf` i rozstrzygnięciach autora. Żaden obowią
 | Duplikaty przed i po | zrealizowany | `kontrola_jakosci.md` sekcja 2 (432 → 420; 0 różnych od oryginału). Zastrzeżenie: punkt 5 w sekcji 0.1. |
 | Typy kolumn | zrealizowany | sekcja 3: 30/30 zgodnych, 0 tekstu w kolumnach liczbowych. |
 | Odstające z interpretacją | zrealizowany | sekcja 4 (IQR i z-score, każda cecha z interpretacją: anomalia vs błąd parsera). |
-| Wniosek o parserze i co poprawiono | zrealizowany | sekcja 7: 0 niezgodności w 7980 porównaniach, brak zmian w `parsing/`; wymiary do potwierdzenia (punkt 3 w sekcji 0.1). |
+| Wniosek o parserze i co poprawiono | zrealizowany | sekcja 7: 0 niezgodności w 7980 porównaniach, poprawiono tylko nazwy kolumn wymiarów w `parsing/` (punkt 3 w sekcji 0.1). |
 | Średnia, mediana, moda, kwartyle, min, max | zrealizowany | `statystyki.md` sekcje 2-3. |
 | Histogram (≥ 1), box-plot (≥ 1) | zrealizowany | `analiza/wykresy/hist_cena_pln.png`, `hist_ocena.png`, `box_cena_pln_kategoria.png`. |
 | Korelacja ≥ 2 cech z komentarzem | zrealizowany | `statystyki.md` sekcja 5 (7 par, Pearson i Spearman, komentarz); `korelacje.png`. Zastrzeżenie: punkt 4 w sekcji 0.1. |
@@ -155,7 +155,7 @@ poniżej są cytowane z PDF-a, a nie ze streszczenia w `WYMAGANIA.md`. Dowody: p
 |---|---|---|---|
 | Walidacja typów kolumn i raport z liczbą odrzuconych | nie | n/d | Zob. P6. |
 | Eksport do dwóch formatów jednocześnie (CSV oraz XLSX lub JSON) | **tak** | zrealizowany | `eksport.eksportuj`: CSV + JSON jednym wywołaniem; `tests/test_eksport.py` (4). |
-| Logowanie do pliku z podsumowaniem (strony, rekordy, błędy, czas) | **tak** | zrealizowany | `logs/bajtoparser_20261013_001635.log`: stron=6, rekordów=420, błędów=0, czas=351.59 s. |
+| Logowanie do pliku z podsumowaniem (strony, rekordy, błędy, czas) | **tak** | zrealizowany | `logs/bajtoparser_20261018_165547.log`: stron=6, rekordów=420, błędów=0, czas=362.46 s. |
 | Minimum 3 testy jednostkowe funkcji czyszczących | **tak** | zrealizowany | 48 testów czyszczenia (`test_ceny` 7, `test_daty_braki` 6, `test_pola` 15, `test_duplikaty` 6, `test_rekord` 14); 240 testów zielonych. |
 | Pobieranie równoległe z limitem | nie | poza zakresem | Wykluczone w `WYMAGANIA.md`. |
 | Parametryzacja z CLI (adres serwisu, liczba stron, plik wyjściowy) | **tak** | zrealizowany | `--adres`, `--strony`, `--wyjscie`, `--katalog-wyjscia` (+ `--limit`, `--headless`, `--pauza`, `--timeout`, `--porownanie`); `tests/test_cli.py` (9). |
@@ -170,7 +170,7 @@ Wybrane 4 (wymagane 2): **spełnione z zapasem**.
 | Duplikaty przed i po odrzuceniu | zrealizowany | sekcja 2 (432 → 420). Zastrzeżenie: punkt 5. |
 | Typy kolumn: czy liczbowe są liczbowe | zrealizowany | sekcja 3: 30/30 zgodnych, 0 tekstu w kolumnach liczbowych. |
 | Wartości odstające z interpretacją (anomalia czy błąd parsera, np. 129900 zamiast 1299) | zrealizowany | sekcja 4 (IQR i z-score, interpretacja każdej cechy) i test naiwnego `replace(",", ".")`; 0 przypadków zawyżenia 100× w danych. |
-| Wniosek: co mówi o parserze i co poprawiono | zrealizowany | sekcja 7: 0 niezgodności w 7980 porównaniach, brak poprawek w `parsing/`. Otwarte: punkt 3 (nazwy wymiarów). |
+| Wniosek: co mówi o parserze i co poprawiono | zrealizowany | sekcja 7: 0 niezgodności w 7980 porównaniach, jedyna poprawka w `parsing/`: nazwy kolumn wymiarów (punkt 3). |
 | Średnia, mediana, moda, kwartyle, min, max | zrealizowany | `statystyki.md`, sekcje 2-3. |
 | Histogram co najmniej jednej cechy | zrealizowany | `analiza/wykresy/hist_cena_pln.png`, `hist_ocena.png`. |
 | Box-plot co najmniej jednej cechy | zrealizowany | `analiza/wykresy/box_cena_pln_kategoria.png`. |
@@ -191,7 +191,7 @@ Wybrane 4 (wymagane 2): **spełnione z zapasem**.
 |---|---|---|---|
 | Obsługa kodu 429 z Retry-After | nie | poza zakresem | Serwis nie ma takiego mechanizmu. |
 | Zrzut ekranu i zapis źródła strony przy każdym błędzie | **tak** | zrealizowany | `utils/diagnostyka.zapisz_diagnostyke`; `diagnostyka/` (8 plików); `tests/test_diagnostyka.py` (5). Zob. uwaga poniżej. |
-| Tryb headless z pomiarem czasu w obu trybach | **tak** | zrealizowany | okno 351,59 s, headless 410,30 s; wyniki identyczne (SHA-256). Punkt 9. |
+| Tryb headless z pomiarem czasu w obu trybach | **tak** | zrealizowany | okno 362,46 s, headless 347,47 s; wyniki identyczne (SHA-256). Punkt 9. |
 | Wznawianie sesji (checkpoint) | nie | poza zakresem | Wykluczone w `WYMAGANIA.md`. |
 | Porównanie czasu i pamięci: bez przeglądarki vs Selenium | nie | poza zakresem | Wykluczone w `WYMAGANIA.md`. |
 | Wykrycie i użycie źródła danych (JSON) z omówieniem | nie | pominięte | Decyzja, punkt 11. |
@@ -233,4 +233,4 @@ wymagania obowiązkowe 3.0, 4.0 i 5.0 mają status „zrealizowany” (jedyny wy
 porównanie HTML z DOM w sprawozdaniu, „częściowo” tylko z powodu braku PDF-a), rozszerzenia
 4.0: 4 przy wymaganych 2, rozszerzenia 5.0: 2 przy wymaganych 2. Do zrobienia zostają
 elementy organizacyjne: sprawozdanie w PDF (z opisem serwisu od partnera), archiwum ZIP i
-odpowiedź ustna, oraz otwarty punkt 3 (nazwy wymiarów, do sprawdzenia z kluczem).
+odpowiedź ustna. Punkt 3 (nazwy wymiarów) rozstrzygnięty.

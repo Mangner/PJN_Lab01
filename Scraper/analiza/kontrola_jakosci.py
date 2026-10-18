@@ -112,7 +112,7 @@ def zgodnosc_surowe_oczyszczone(df: pd.DataFrame, surowe: pd.DataFrame) -> pd.Da
     for kolumna, (pole, funkcja) in _niezalezne(s).items():
         porownaj(kolumna, s[pole].map(funkcja), df[kolumna])
     wym = s["wymiary"].map(_wymiary_niezalezne)
-    for i, kolumna in enumerate(["dlugosc_cm", "szerokosc_cm", "wysokosc_cm"]):
+    for i, kolumna in enumerate(["szerokosc_cm", "wysokosc_cm", "glebokosc_cm"]):
         porownaj(kolumna, wym.map(lambda t, i=i: t[i]), df[kolumna])
     daty = pd.to_datetime(s["data_dodania"], format="%d.%m.%Y").dt.strftime("%Y-%m-%d")
     wiersze.append(
@@ -298,8 +298,8 @@ def _interpretacja(nazwa: str, czesc: pd.DataFrame, kolumna: str) -> str:
         return (
             "Duże i długie towary (telewizory i soundbary, lampy stojące, sprzęt sportowy). "
             "Wartości zgodne z surowym tekstem `a x b x c cm`, więc to **nie błąd przepisania**; "
-            "wątpliwość dotyczy tylko tego, czy pozycja liczby w tekście odpowiada nazwie osi "
-            "(patrz wniosek)."
+            "pozycja liczby w tekście odpowiada nazwie osi (szerokość × wysokość × głębokość, "
+            "patrz wniosek)."
         )
     return ""
 
@@ -318,9 +318,9 @@ def sekcja_odstajace(df: pd.DataFrame, surowe: pd.DataFrame, niezgodne: int) -> 
         ("cena EUR", d[d["waluta"] == "EUR"], "cena", "surowa_cena"),
         ("cena USD", d[d["waluta"] == "USD"], "cena", "surowa_cena"),
         ("waga_kg", d, "waga_kg", "surowa_waga"),
-        ("dlugosc_cm", d, "dlugosc_cm", "surowe_wymiary"),
         ("szerokosc_cm", d, "szerokosc_cm", "surowe_wymiary"),
         ("wysokosc_cm", d, "wysokosc_cm", "surowe_wymiary"),
+        ("glebokosc_cm", d, "glebokosc_cm", "surowe_wymiary"),
         ("liczba_opinii", d, "liczba_opinii", "surowe_opinie"),
         ("stan_magazynowy_szt", d, "stan_magazynowy_szt", "surowy_stan"),
     ]
@@ -582,13 +582,12 @@ def main() -> None:
             else "**Wniosek: wykryto rozbieżności, patrz punkty oznaczone powyżej; wymagają "
             "analizy przed ewentualną zmianą w `parsing/`.**"
         )
-        + "\n\n**Do weryfikacji z kluczem odpowiedzi (nie rozstrzygalne z samych danych):** "
-        "kolejność liczb w `wymiary` (`17 x 9 x 8 cm`) jest w serwisie niepodpisana; parser "
-        "przypisuje ją jako długość × szerokość × wysokość. Rozkłady (np. lampy stojące "
-        "o „szerokości” rzędu 160–190 cm, telefony 7 × 14 × 1 cm) sugerują, że nazwy kolumn "
-        "`dlugosc_cm`/`szerokosc_cm`/`wysokosc_cm` mogą nie odpowiadać znaczeniu tych liczb. "
-        "Wartości są poprawnie przepisane, wątpliwe jest tylko nazewnictwo. Nie zmieniano go "
-        "bez potwierdzenia."
+        + "\n\n**Poprawka nazw kolumn wymiarów (wynik analizy):** serwis nie podpisuje liczb w "
+        "`wymiary` (`17 x 9 x 8 cm`), a pierwotnie przypisano je jako długość × szerokość × "
+        "wysokość. Rozkłady (lampy stojące 36 × 191 × 47 cm, telefony 7 × 14 × 1 cm) wskazały, "
+        "że kolejność jest inna; kod generatora serwisu potwierdził: szerokość × wysokość × "
+        "głębokość. Kolumny nazwano `szerokosc_cm`/`wysokosc_cm`/`glebokosc_cm`. Wartości były "
+        "przepisane poprawnie, zmieniły się tylko nazwy."
     )
 
     zgodnosc_md = w.tabela_md(zgodnosc)

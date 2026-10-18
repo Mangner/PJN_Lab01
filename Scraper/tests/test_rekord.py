@@ -81,7 +81,7 @@ def test_kolejnosc_kolumn_stala():
 
 def test_wymiary_na_trzy_kolumny():
     wynik = czysc_rekord(surowy_rekord(wymiary="120 x 60,5 x 75 cm"))
-    assert (wynik["dlugosc_cm"], wynik["szerokosc_cm"], wynik["wysokosc_cm"]) == (
+    assert (wynik["szerokosc_cm"], wynik["wysokosc_cm"], wynik["glebokosc_cm"]) == (
         120.0,
         60.5,
         75.0,
@@ -93,7 +93,7 @@ def test_wymiary_na_trzy_kolumny():
 def test_brak_wymiarow_to_none_bez_nierozpoznanych(brak):
     surowy = surowy_rekord(wymiary=brak)
     wynik = czysc_rekord(surowy)
-    assert wynik["dlugosc_cm"] is wynik["szerokosc_cm"] is wynik["wysokosc_cm"] is None
+    assert wynik["szerokosc_cm"] is wynik["wysokosc_cm"] is wynik["glebokosc_cm"] is None
     assert nierozpoznane_pola(surowy) == []
 
 
@@ -123,7 +123,7 @@ def test_rekord_bez_szczegolow():
     assert wynik["cena"] == 1299.0
     assert all(
         wynik[k] is None
-        for k in ("opis", "ean", "waga_kg", "dlugosc_cm", "koszt_dostawy", "waluta_dostawy")
+        for k in ("opis", "ean", "waga_kg", "szerokosc_cm", "koszt_dostawy", "waluta_dostawy")
     )
     assert nierozpoznane_pola(surowy) == []
 

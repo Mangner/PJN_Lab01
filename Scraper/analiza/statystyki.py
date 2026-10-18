@@ -36,9 +36,9 @@ CECHY_OPISOWE = [
     ("liczba_opinii", "liczba opinii"),
     ("gwarancja_mies", "gwarancja (mies.)"),
     ("waga_kg", "waga (kg)"),
-    ("dlugosc_cm", "wymiar 1 (cm)"),
-    ("szerokosc_cm", "wymiar 2 (cm)"),
-    ("wysokosc_cm", "wymiar 3 (cm)"),
+    ("szerokosc_cm", "szerokość (cm)"),
+    ("wysokosc_cm", "wysokość (cm)"),
+    ("glebokosc_cm", "głębokość (cm)"),
     ("stan_magazynowy_szt", "stan magazynowy (szt.)"),
     ("czas_dostawy_dni", "czas dostawy (dni)"),
     ("koszt_dostawy", "koszt dostawy"),
@@ -384,8 +384,8 @@ rysujemy w skali logarytmicznej.
 Uwagi: `n` mniejsze niż {len(df)} oznacza braki (ocena, gwarancja, waga). Moda cech ciągłych
 (waga, wymiary) bywa przypadkowa (przy remisach pokazano do trzech wartości), więc do opisu
 tych cech służą mediana i kwartyle.
-Kolumny wymiarów opisano „wymiar 1/2/3” w kolejności z tekstu serwisu, bo ich znaczenie
-(długość, szerokość, wysokość) jest do potwierdzenia, patrz `kontrola_jakosci.md`, sekcja 7.
+Kolumny wymiarów (szerokość, wysokość, głębokość) odpowiadają kolejności liczb w tekście
+serwisu; nazwy ustalono po analizie rozkładów, patrz `kontrola_jakosci.md`, sekcja 7.
 
 ## 4. Wykresy
 

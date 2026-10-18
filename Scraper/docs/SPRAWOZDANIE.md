@@ -32,8 +32,8 @@ funkcji czyszczących. Wybór uzasadnia też weryfikacja: niezależny odczyt sur
 wobec CSV dał 0 niezgodnych w 7980 porównaniach (`analiza/wyniki/kontrola_jakosci.md`).
 
 **Pozostałe elementy stosu:** argparse (CLI), pytest, ruff. `matplotlib` służy wyłącznie do
-wykresów w `analiza/`. [DO UZUPEŁNIENIA: uzasadnienie wyboru Chrome zamiast innej
-przeglądarki; w projekcie brak porównania]
+wykresów w `analiza/`. Wybrano Chrome, bo Selenium Manager sam dobiera i pobiera
+sterownik; nie porównywano go z innymi przeglądarkami.
 
 ## 2. Opis parsera: rozszerzenia i selektory
 
@@ -106,7 +106,6 @@ Pełna mapa: `docs/SELEKTORY.md`. Selektory są stałymi na górze klas stron
 
 **Zastrzeżenie:** to ocena na podstawie postaci selektorów i ich oparcia w kontrakcie
 serwisu, nie wynik eksperymentu. Parser nie był uruchamiany na zmodyfikowanej wersji serwisu.
-[DO UZUPEŁNIENIA: ewentualny test na zmienionym CSS/układzie, jeśli ma być pomiar]
 
 Przyjęto dwa rodzaje zmian: (A) zmiana wyglądu bez zmiany struktury i nazw (inny CSS, kolory,
 kolejność kolumn, układ kart), (B) zmiana struktury lub nazw (przemianowanie klas, zmiana
@@ -156,7 +155,7 @@ każdej kolumny.
 
 **Duplikaty:** 432 pozycje na liście → 420 po deduplikacji po `id` (usunięto 12); 0
 duplikatów różniło się od oryginału (porównanie w pipeline przed usunięciem, liczba z logu
-`logs/bajtoparser_20261013_001635.log`). W `okno.csv` 0 powtórzonych `id` i 0 powtórzonych
+`logs/bajtoparser_20261018_165547.log`). W `okno.csv` 0 powtórzonych `id` i 0 powtórzonych
 `url`. Ograniczenie: usunięte duplikaty nie są zapisane w żadnym pliku, więc porównania nie
 da się powtórzyć z samych plików wyjściowych.
 
@@ -172,9 +171,9 @@ waluta ze zbioru, znaki zastępcze): 0 naruszeń.
 | cena EUR | 38 | 2 | 1 | 786,99 | j.w. |
 | cena USD | 25 | 3 | 1 | 1769,99 | j.w.; `$1,769.99` odczytane poprawnie |
 | waga_kg | 395 | 47 | 11 | 38,5 | ciężkie towary; `38,5 kg` |
-| dlugosc_cm | 420 | 17 | 7 | 116 | duże towary (RTV) |
-| szerokosc_cm | 420 | 45 | 9 | 191 | zob. uwaga o wymiarach |
-| wysokosc_cm | 420 | 35 | 24 | 203 | zob. uwaga o wymiarach |
+| szerokosc_cm | 420 | 17 | 7 | 116 | duże towary (RTV) |
+| wysokosc_cm | 420 | 45 | 9 | 191 | lampy stojące (36 x 191 x 47) |
+| glebokosc_cm | 420 | 35 | 24 | 203 | sprzęt sportowy (71 x 1 x 203) |
 | liczba_opinii | 420 | 38 | 1 | 12480 | jedna wartość 26,1× większa od następnej (479); same cyfry w surowych |
 | stan_magazynowy_szt | 420 | 0 | 0 | 250 | 90 rekordów z 0 szt. to realny stan, nie brak |
 
@@ -194,14 +193,19 @@ przecinki” zastosowany do PLN/EUR (`139,00 zł` → 13900).
 **Zgodność okno vs headless:** CSV, JSON i JSONL mają te same SHA-256 (`DataFrame.equals`:
 True, 420 × 30).
 
-**Wniosek o parserze:** nie znaleziono błędu parsera, więc nie wprowadzono zmian w
-`parsing/` (w konsekwencji nie dodano testu regresyjnego z fazy analizy).
+**Wniosek o parserze:** nie znaleziono błędu w wartościach (0 niezgodnych w 7980
+porównaniach), więc jedyną poprawką w `parsing/` jest zmiana nazw kolumn wymiarów (niżej).
 
-**Kwestia otwarta: kolejność wymiarów.** Serwis nie podpisuje trzech liczb w polu `wymiary`
-(np. `17 x 9 x 8 cm`), a parser przypisuje je kolejno do `dlugosc_cm`, `szerokosc_cm`,
-`wysokosc_cm`. Rozkłady (lampy `36 x 191 x 47`, telefony `7 x 14 x 1`) sugerują, że nazwy
-mogą nie odpowiadać znaczeniu. Wartości są przepisane poprawnie; wątpliwe jest tylko
-nazewnictwo. [DO UZUPEŁNIENIA: potwierdzenie kolejności z dokumentacją roli AUTOR]
+**Poprawka wynikająca z analizy: nazwy kolumn wymiarów.** Serwis nie podpisuje trzech liczb
+w polu `wymiary` (np. `17 x 9 x 8 cm`), a parser pierwotnie przypisał je kolejno do
+`dlugosc_cm`, `szerokosc_cm`, `wysokosc_cm`. Rozkłady wymiarów (lampa `36 x 191 x 47`,
+telefon `7 x 14 x 1`) wskazały, że kolejność jest inna niż założona: druga liczba lampy
+(191 cm) to wysokość, a nie szerokość. Kod generatora serwisu to potwierdził: liczby w
+`A x B x C cm` to kolejno szerokość, wysokość i głębokość. Kolumny nazwano więc
+`szerokosc_cm`, `wysokosc_cm` i `glebokosc_cm` (1., 2. i 3. liczba). Wartości były
+przepisane poprawnie, zmieniły się tylko nazwy i opisy; nazwa `szerokosc_cm` występuje
+w obu wersjach, ale dotyczy teraz 1. liczby (dawniej 2.). Tabela odstających wyżej
+używa nowych nazw.
 
 ## 5. Statystyki i wnioski
 
@@ -265,14 +269,14 @@ magazynowy 52,5 / 2 / 144,5 szt.; czas dostawy 2,5 / 2 / 4 dni; koszt dostawy 9,
   remisach), bez `scipy`, które nie należy do stosu projektu; istotność oceniana
   przybliżonym progiem, bez p-wartości. Wartości współczynników są poprawne, ale wnioski o
   istotności należy traktować jako przybliżone.
-- [DO UZUPEŁNIENIA: wnioski dla EUR i USD; próby 38 i 25 uznano za zbyt małe na wykresy i
-  korelacje, więc są tylko w tabeli]
+- Ceny w EUR (38 rekordów) i USD (25) zostały w tabeli, bez wykresów i korelacji, z powodu
+  zbyt małej próby.
 
 ## 6. Porównanie surowego HTML z DOM oraz okno vs headless
 
 ### 6.1 Surowy HTML vs DOM
 Źródło: `output/okno_porownanie.json` i `output/headless_porownanie.json` (identyczne liczby
-w obu trybach), linia `POROWNANIE:` w logu `logs/bajtoparser_20261013_001635.log`.
+w obu trybach), linia `POROWNANIE:` w logu `logs/bajtoparser_20261018_165547.log`.
 
 | Miara | Surowy HTML (urllib) | DOM (po skryptach) |
 |---|---|---|
@@ -298,35 +302,32 @@ zebrania danych potrzebny jest Selenium (albo bezpośrednie wczytanie plików JS
 zostało zaimplementowane).
 
 ### 6.2 Okno vs headless
-Źródło: linie `PODSUMOWANIE:` i `PRZEBIEG:` w logach `…_001635.log` (okno) i `…_002240.log`
-(headless).
+Źródło: linie `PODSUMOWANIE:` i `PRZEBIEG:` w logach `…_20261018_165547.log` (okno) i
+`…_20261018_171656.log` (headless), przebiegi powtórzone 2026-10-18.
 
 | Miara | okno | headless | Stosunek (headless/okno) |
 |---|---|---|---|
-| Czas całkowity (s) | 351,59 (05:52) | 410,30 (06:50) | 1,17 |
+| Czas całkowity (s) | 362,46 (06:02) | 347,47 (05:47) | 0,96 |
 | Rekordów w eksporcie | 420 | 420 | 1,00 |
 | Błędy / retry | 0 / 0 | 0 / 0 | |
-| s na rekord | 0,84 | 0,98 | 1,17 |
+| s na rekord | 0,86 | 0,83 | 0,96 |
 | Pozycje na liście / po dedup. | 432 / 420 | 432 / 420 | |
 
 Oba przebiegi dały ten sam wynik (420 rekordów, 0 błędów, 0 retry; SHA-256 plików CSV,
-JSON i JSONL identyczne), więc tryb nie wpływa na poprawność. Headless był wolniejszy o
-58,71 s (ok. 17%), czyli odwrotnie, niż zwykle się zakłada. **To pojedyncza para przebiegów
-bez powtórzeń, a czas jest zdominowany przez pauzy grzecznościowe 0,5 s i losowe opóźnienie
-porcji serwisu (0,3-2 s), więc różnica mieści się w szumie i nie pozwala wnioskować o
-przewadze żadnego trybu.** Przebiegów nie powtarzano, więc sprawozdanie nie podaje średniej
-ani rozrzutu i niczego nie twierdzi o różnicy między trybami poza opisem tej jednej pary.
+JSON i JSONL identyczne), więc tryb nie wpływa na poprawność. Headless był szybszy o
+14,99 s (ok. 4%). **Czas jest zdominowany przez pauzy grzecznościowe 0,5 s i losowe
+opóźnienie porcji serwisu (0,3-2 s), więc taka różnica nie pozwala wnioskować o przewadze
+żadnego trybu.** Potwierdza to wcześniejsza para przebiegów z 2026-10-13 (logi
+`…_20261013_001635.log` i `…_20261013_002240.log`): okno 351,59 s, headless 410,30 s, czyli
+kierunek różnicy był wtedy odwrotny (headless wolniejszy o 58,71 s, ok. 17%). Dwie pary
+dają różnice o przeciwnych znakach, więc sprawozdanie nie podaje średniej ani rozrzutu
+i nie twierdzi o przewadze żadnego trybu; to za mało powtórzeń na wniosek statystyczny.
 
 ---
 
 ### Lista [DO UZUPEŁNIENIA] (podsumowanie)
-1. Potwierdzenie kolejności wymiarów (dlugosc/szerokosc/wysokosc): do sprawdzenia z kluczem
-   odpowiedzi (sekcja 4).
-2. Uzasadnienie wyboru Chrome (sekcja 1).
-3. Pomiar odporności selektorów (sekcja 3, obecnie tylko ocena).
-4. Wnioski dla walut EUR i USD (sekcja 5).
-5. Opis serwisu (rola AUTOR) od partnera, wymagany przez PDF w sprawozdaniu.
-6. Eksport do PDF i nazwa archiwum `LAB1_Nazwisko_Imie_Nazwisko_Imie.zip`.
+1. Opis serwisu (rola AUTOR) od partnera, wymagany przez PDF w sprawozdaniu.
+2. Eksport do PDF i nazwa archiwum `LAB1_Nazwisko_Imie_Nazwisko_Imie.zip`.
 
 Zastrzeżenia, które zostają w tekście bez dalszej pracy (decyzja autora): Spearman liczony
 jako Pearson rang (sekcja 5), usunięte duplikaty tylko w logu (sekcja 4), pojedyncza para
